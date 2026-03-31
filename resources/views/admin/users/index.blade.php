@@ -1,0 +1,200 @@
+@extends('layouts.app')
+
+@section('title', 'Manage Users')
+
+@section('content')
+    <div class="page-header">
+        <h1 class="page-title">Manage Users</h1>
+        <p class="page-subtitle">Add, edit, and manage user accounts</p>
+    </div>
+
+    <div class="table-card">
+        <div class="table-header">
+            <h3 class="table-title">All Users</h3>
+            <div class="table-actions">
+                <form method="GET" action="{{ route('admin.users.index') }}" class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" name="search" placeholder="Search users..." value="{{ request('search') }}">
+                </form>
+                <button class="btn btn-primary" onclick="openModal('add-user-modal')">
+                    <i data-lucide="plus"></i>
+                    Add User
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Role</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($users as $index => $user)
+                        <tr>
+                            <td>{{ $users->firstItem() + $index }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="avatar-circle" style="width:32px;height:32px;font-size:12px;">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                    <span style="font-weight:500;">{{ $user->name }}</span>
+                                </div>
+                            </td>
+                            <td style="color:var(--text-secondary);">{{ $user->email }}</td>
+                            <td>{{ $user->department ?? '-' }}</td>
+                            <td><span class="badge {{ $user->role === 'admin' ? 'badge-active' : 'badge-approved' }}">{{ ucfirst($user->role) }}</span></td>
+                            <td style="color:var(--text-muted); font-size:12px;">{{ $user->created_at->format('d M Y') }}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->email }}', '{{ $user->department }}', '{{ $user->role }}')" title="Edit">
+                                        <i data-lucide="pencil"></i>
+                                    </button>
+                                    @if($user->id !== auth()->id())
+                                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-ghost btn-sm btn-icon" style="color:var(--danger);" title="Delete">
+                                                <i data-lucide="trash-2"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7">
+                            <div class="empty-state">
+                                <i data-lucide="users"></i>
+                                <p class="empty-title">No users found</p>
+                                <p class="empty-desc">Get started by adding a new user.</p>
+                            </div>
+                        </td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @if($users->hasPages())
+            <div class="pagination-wrapper">
+                {{ $users->withQueryString()->links() }}
+            </div>
+        @endif
+    </div>
+@endsection
+
+@push('modals')
+<!-- Add User Modal -->
+<div class="modal" id="add-user-modal" style="display:none;">
+    <div class="modal-header">
+        <h3 class="modal-title">Add New User</h3>
+        <button class="modal-close" onclick="closeAllModals()"><i data-lucide="x"></i></button>
+    </div>
+    <form method="POST" action="{{ route('admin.users.store') }}">
+        @csrf
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" name="name" required placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" name="email" required placeholder="name@ptbpi.co.id">
+                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;">Must use @ptbpi.co.id domain</small>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" required placeholder="Minimum 8 characters" minlength="8">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <select class="form-control" name="department" required>
+                        <option value="">Select Department</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept }}">{{ $dept }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select class="form-control" name="role" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add User</button>
+        </div>
+    </form>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal" id="edit-user-modal" style="display:none;">
+    <div class="modal-header">
+        <h3 class="modal-title">Edit User</h3>
+        <button class="modal-close" onclick="closeAllModals()"><i data-lucide="x"></i></button>
+    </div>
+    <form method="POST" id="edit-user-form">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" name="name" id="edit-name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" name="email" id="edit-email" required placeholder="name@ptbpi.co.id">
+                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;">Must use @ptbpi.co.id domain</small>
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password (leave blank to keep current)</label>
+                <input type="password" class="form-control" name="password" placeholder="Leave blank to keep current">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <select class="form-control" name="department" id="edit-department" required>
+                        <option value="">Select Department</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept }}">{{ $dept }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select class="form-control" name="role" id="edit-role" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update User</button>
+        </div>
+    </form>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+function openEditUser(id, name, email, department, role) {
+    document.getElementById('edit-user-form').action = '/admin/users/' + id;
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-email').value = email;
+    document.getElementById('edit-department').value = department;
+    document.getElementById('edit-role').value = role;
+    openModal('edit-user-modal');
+    lucide.createIcons();
+}
+</script>
+@endpush
