@@ -56,47 +56,174 @@ class DashboardController extends Controller
     {
         Borrowing::checkAndUpdateOverdue();
 
-        $filter = $request->get('filter', 'monthly');
         $year = $request->get('year', date('Y'));
-        $month = $request->get('month', date('m'));
+        $month = $request->get('month', '');
 
-        $query = Borrowing::with(['user', 'asset']);
+        $query = Borrowing::with(['user', 'user', 'asset']);
 
-        if ($filter === 'monthly') {
+        if ($month) {
             $query->whereYear('borrow_date', $year)->whereMonth('borrow_date', $month);
-        } elseif ($filter === 'yearly') {
+        } else {
             $query->whereYear('borrow_date', $year);
         }
 
         $borrowings = $query->orderBy('borrow_date', 'desc')->get();
 
-        $mostBorrowed = Borrowing::select('asset_id')
+        $mostBorrowedQuery = Borrowing::select('asset_id')
             ->selectRaw('COUNT(*) as borrow_count')
-            ->selectRaw('SUM(quantity) as total_quantity')
-            ->whereYear('borrow_date', $year)
+            ->whereYear('borrow_date', $year);
+        if ($month) {
+            $mostBorrowedQuery->whereMonth('borrow_date', $month);
+        }
+        $mostBorrowed = $mostBorrowedQuery
             ->groupBy('asset_id')
             ->orderByDesc('borrow_count')
             ->with('asset')
             ->take(10)
             ->get();
 
-        $returnedItems = Borrowing::with(['user', 'asset'])
+        $returnedQuery = Borrowing::with(['user', 'asset'])
             ->where('status', 'returned')
-            ->whereYear('return_date', $year)
-            ->orderBy('return_date', 'desc')
-            ->get();
+            ->whereYear('return_date', $year);
+        if ($month) {
+            $returnedQuery->whereMonth('return_date', $month);
+        }
+        $returnedItems = $returnedQuery->orderBy('return_date', 'desc')->get();
 
         $monthlyData = $this->getMonthlyBorrowData($year);
+
+        $equipmentData = $this->getEquipmentBorrowData($year, $month);
+
+        $monthLabel = $month ? date('F', mktime(0, 0, 0, $month, 1)) : 'All Months';
 
         return view('admin.monthly-borrowing', compact(
             'borrowings',
             'mostBorrowed',
             'returnedItems',
             'monthlyData',
-            'filter',
+            'equipmentData',
             'year',
-            'month'
+            'month',
+            'monthLabel'
         ));
+    }
+
+    public function exportBorrowings(Request $request)
+    {
+        $year = $request->get('year', date('Y'));
+        $month = $request->get('month', '');
+
+        $query = Borrowing::with(['user', 'asset'])->whereYear('borrow_date', $year);
+        if ($month) {
+            $query->whereMonth('borrow_date', $month);
+        }
+        $borrowings = $query->orderBy('borrow_date', 'desc')->get();
+
+        $filename = "borrow_details_{$year}" . ($month ? "_{$month}" : "") . ".csv";
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($borrowings) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, ['No', 'User', 'Department', 'Asset', 'Borrow Date', 'Return Date', 'Status']);
+
+            foreach ($borrowings as $i => $b) {
+                fputcsv($file, [
+                    $i + 1,
+                    $b->user->name ?? '-',
+                    $b->user->department ?? '-',
+                    $b->asset->asset_name ?? '-',
+                    $b->borrow_date ? $b->borrow_date->format('Y-m-d') : '-',
+                    $b->return_date ? $b->return_date->format('Y-m-d') : '-',
+                    ucfirst($b->status),
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportMostBorrowed(Request $request)
+    {
+        $year = $request->get('year', date('Y'));
+        $month = $request->get('month', '');
+
+        $query = Borrowing::select('asset_id')
+            ->selectRaw('COUNT(*) as borrow_count')
+            ->whereYear('borrow_date', $year);
+        if ($month) {
+            $query->whereMonth('borrow_date', $month);
+        }
+        $items = $query->groupBy('asset_id')->orderByDesc('borrow_count')->with('asset')->get();
+
+        $filename = "most_borrowed_{$year}" . ($month ? "_{$month}" : "") . ".csv";
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($items) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, ['Rank', 'Asset Name', 'Total Borrow']);
+
+            foreach ($items as $i => $item) {
+                fputcsv($file, [
+                    $i + 1,
+                    $item->asset->asset_name ?? '-',
+                    $item->borrow_count,
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportReturnedItems(Request $request)
+    {
+        $year = $request->get('year', date('Y'));
+        $month = $request->get('month', '');
+
+        $query = Borrowing::with(['user', 'asset'])
+            ->where('status', 'returned')
+            ->whereYear('return_date', $year);
+        if ($month) {
+            $query->whereMonth('return_date', $month);
+        }
+        $items = $query->orderBy('return_date', 'desc')->get();
+
+        $filename = "returned_items_{$year}" . ($month ? "_{$month}" : "") . ".csv";
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($items) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, ['No', 'Name', 'Asset Name', 'Return Date', 'Return PIC']);
+
+            foreach ($items as $i => $item) {
+                fputcsv($file, [
+                    $i + 1,
+                    $item->user->name ?? '-',
+                    $item->asset->asset_name ?? '-',
+                    $item->return_date ? $item->return_date->format('Y-m-d') : '-',
+                    $item->return_pic ?? '-',
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     private function getMonthlyBorrowData($year = null)
@@ -112,5 +239,27 @@ class DashboardController extends Controller
         }
 
         return $data;
+    }
+
+    private function getEquipmentBorrowData($year, $month = null)
+    {
+        $query = Borrowing::select('asset_id')
+            ->selectRaw('COUNT(*) as borrow_count')
+            ->whereYear('borrow_date', $year);
+
+        if ($month) {
+            $query->whereMonth('borrow_date', $month);
+        }
+
+        return $query->groupBy('asset_id')
+            ->with('asset')
+            ->orderByDesc('borrow_count')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->asset->asset_name ?? 'Unknown',
+                    'count' => $item->borrow_count,
+                ];
+            });
     }
 }

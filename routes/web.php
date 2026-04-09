@@ -41,6 +41,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/monthly-borrowing', [DashboardController::class, 'monthlyBorrowing'])->name('monthly-borrowing');
+        Route::get('/monthly-borrowing/export-borrowings', [DashboardController::class, 'exportBorrowings'])->name('monthly-borrowing.export-borrowings');
+        Route::get('/monthly-borrowing/export-most-borrowed', [DashboardController::class, 'exportMostBorrowed'])->name('monthly-borrowing.export-most-borrowed');
+        Route::get('/monthly-borrowing/export-returned', [DashboardController::class, 'exportReturnedItems'])->name('monthly-borrowing.export-returned');
 
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
@@ -58,6 +61,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/borrow-requests/{borrowing}/handover', [BorrowRequestController::class, 'handover'])->name('borrow-requests.handover');
 
         Route::get('/active-borrows', [ActiveBorrowController::class, 'index'])->name('active-borrows.index');
+        Route::put('/active-borrows/{borrowing}', [ActiveBorrowController::class, 'update'])->name('active-borrows.update');
         Route::post('/active-borrows/{borrowing}/return', [ActiveBorrowController::class, 'markReturned'])->name('active-borrows.return');
 
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

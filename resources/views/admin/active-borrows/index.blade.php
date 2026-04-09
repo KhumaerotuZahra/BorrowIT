@@ -22,21 +22,22 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>Borrow ID</th>
+                        <th>Request ID</th>
                         <th>User</th>
                         <th>Asset</th>
-                        <th>Qty</th>
                         <th>Borrow Date</th>
                         <th>Due Date</th>
-                        <th>Return Date</th>
+                        <th>Handover PIC</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Return PIC</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($borrowings as $index => $borrow)
                         <tr>
-                            <td>{{ $borrowings->firstItem() + $index }}</td>
+                            <td class="font-mono">BRW-{{ str_pad($borrow->id, 4, '0', STR_PAD_LEFT) }}</td>
+                            <td class="font-mono">REQ-{{ str_pad($borrow->id, 4, '0', STR_PAD_LEFT) }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <div class="avatar-circle" style="width:30px;height:30px;font-size:11px;">{{ strtoupper(substr($borrow->user->name, 0, 1)) }}</div>
@@ -50,7 +51,6 @@
                                 <div style="font-weight:500;">{{ $borrow->asset->asset_name }}</div>
                                 <div class="font-mono" style="font-size:11px;color:var(--text-muted);">{{ $borrow->asset->asset_id }}</div>
                             </td>
-                            <td>{{ $borrow->quantity }}</td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">
                                 {{ $borrow->due_date->format('d M Y') }}
@@ -60,24 +60,58 @@
                                     </div>
                                 @endif
                             </td>
-                            <td style="font-size:12px;">{{ $borrow->return_date ? $borrow->return_date->format('d M Y') : '-' }}</td>
-                            <td>
-                                <span class="badge badge-{{ $borrow->status }}">
-                                    {{ ucfirst($borrow->status) }}
-                                </span>
-                            </td>
+                            {{-- Handover PIC - Select Employee IT --}}
                             <td>
                                 @if(in_array($borrow->status, ['active', 'overdue']))
-                                    <button class="btn btn-primary btn-sm" onclick="openReturnModal({{ $borrow->id }}, '{{ addslashes($borrow->asset->asset_name) }}', '{{ $borrow->user->name }}')">
-                                        <i data-lucide="undo-2"></i>
-                                        Return
-                                    </button>
+                                    <form method="POST" action="{{ route('admin.active-borrows.update', $borrow) }}" class="inline-form">
+                                        @csrf
+                                        @method('PUT')
+                                        <select name="handover_by" class="form-control form-control-sm" style="min-width:130px;padding:5px 8px;font-size:12px;" onchange="this.form.submit()">
+                                            <option value="">Select PIC</option>
+                                            @foreach($itEmployees as $emp)
+                                                <option value="{{ $emp->name }}" {{ $borrow->handover_by == $emp->name ? 'selected' : '' }}>{{ $emp->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </form>
+                                @else
+                                    <span style="font-size:12px;">{{ $borrow->handover_by ?? '-' }}</span>
+                                @endif
+                            </td>
+                            {{-- Status - Select with auto overdue --}}
+                            <td>
+                                @if($borrow->status === 'overdue')
+                                    <span class="badge badge-overdue">Overdue</span>
+                                    <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Auto-detected</div>
+                                @elseif(in_array($borrow->status, ['active']))
+                                    <form method="POST" action="{{ route('admin.active-borrows.update', $borrow) }}" class="inline-form">
+                                        @csrf
+                                        @method('PUT')
+                                        <select name="status" class="form-control form-control-sm" style="min-width:110px;padding:5px 8px;font-size:12px;" onchange="this.form.submit()">
+                                            <option value="active" {{ $borrow->status == 'active' ? 'selected' : '' }}>Active</option>
+                                            <option value="returned">Returned</option>
+                                        </select>
+                                    </form>
+                                @else
+                                    <span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span>
+                                @endif
+                            </td>
+                            {{-- Return PIC - Select Employee IT --}}
+                            <td>
+                                @if(in_array($borrow->status, ['active', 'overdue']))
+                                    <form method="POST" action="{{ route('admin.active-borrows.update', $borrow) }}" class="inline-form">
+                                        @csrf
+                                        @method('PUT')
+                                        <select name="return_pic" class="form-control form-control-sm" style="min-width:130px;padding:5px 8px;font-size:12px;" onchange="this.form.submit()">
+                                            <option value="">Select PIC</option>
+                                            @foreach($itEmployees as $emp)
+                                                <option value="{{ $emp->name }}" {{ $borrow->return_pic == $emp->name ? 'selected' : '' }}>{{ $emp->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </form>
                                 @elseif($borrow->status === 'returned')
-                                    <span style="font-size:12px;color:var(--text-muted);">
-                                        @if($borrow->return_pic)
-                                            PIC: {{ $borrow->return_pic }}
-                                        @endif
-                                    </span>
+                                    <span style="font-size:12px;">{{ $borrow->return_pic ?? '-' }}</span>
+                                @else
+                                    <span style="font-size:12px;">-</span>
                                 @endif
                             </td>
                         </tr>
@@ -100,46 +134,3 @@
         @endif
     </div>
 @endsection
-
-@push('modals')
-<div class="modal" id="return-modal" style="display:none;">
-    <div class="modal-header">
-        <h3 class="modal-title">Return Asset</h3>
-        <button class="modal-close" onclick="closeAllModals()"><i data-lucide="x"></i></button>
-    </div>
-    <form method="POST" id="return-form">
-        @csrf
-        <div class="modal-body">
-            <div style="padding:14px;background:var(--success-light);border-radius:var(--radius);margin-bottom:18px;">
-                <p style="font-size:13px;color:var(--success);font-weight:600;" id="return-info"></p>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Return PIC (Person In Charge)</label>
-                <input type="text" class="form-control" name="return_pic" placeholder="Name of person receiving the returned asset" value="{{ auth()->user()->name }}">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Notes (Optional)</label>
-                <textarea class="form-control" name="return_notes" placeholder="Condition of the asset, any damages, etc..." rows="3"></textarea>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
-            <button type="submit" class="btn btn-success">
-                <i data-lucide="check-circle"></i>
-                Confirm Return
-            </button>
-        </div>
-    </form>
-</div>
-@endpush
-
-@push('scripts')
-<script>
-function openReturnModal(id, assetName, userName) {
-    document.getElementById('return-form').action = '/admin/active-borrows/' + id + '/return';
-    document.getElementById('return-info').textContent = 'Returning "' + assetName + '" from ' + userName;
-    openModal('return-modal');
-    lucide.createIcons();
-}
-</script>
-@endpush

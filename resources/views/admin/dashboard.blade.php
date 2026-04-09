@@ -45,25 +45,28 @@
     </div>
 
     <div class="content-grid">
+        {{-- Recent Borrow Request --}}
         <div class="table-card">
             <div class="table-header">
-                <h3 class="table-title">Recent Borrow Requests</h3>
+                <h3 class="table-title">Recent Borrow Request</h3>
                 <a href="{{ route('admin.borrow-requests.index') }}" class="btn btn-outline btn-sm">View All</a>
             </div>
             <div class="table-responsive">
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th>Request ID</th>
                             <th>User</th>
                             <th>Asset</th>
-                            <th>Date</th>
+                            <th>Borrow Date</th>
+                            <th>Duration</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($recentRequests as $request)
                             <tr>
+                                <td class="font-mono">REQ-{{ str_pad($request->id, 4, '0', STR_PAD_LEFT) }}</td>
                                 <td>
                                     <div style="display:flex;align-items:center;gap:8px;">
                                         <div class="avatar-circle" style="width:30px;height:30px;font-size:11px;">{{ strtoupper(substr($request->user->name, 0, 1)) }}</div>
@@ -71,23 +74,17 @@
                                     </div>
                                 </td>
                                 <td>{{ $request->asset->asset_name }}</td>
-                                <td>{{ $request->created_at->format('d M Y') }}</td>
-                                <td><span class="badge badge-{{ $request->status }}">{{ ucfirst($request->status) }}</span></td>
-                                <td>
-                                    <div class="action-btns">
-                                        <form method="POST" action="{{ route('admin.borrow-requests.approve', $request) }}">
-                                            @csrf
-                                            <button type="submit" class="btn btn-success btn-sm btn-icon" title="Approve"><i data-lucide="check"></i></button>
-                                        </form>
-                                        <form method="POST" action="{{ route('admin.borrow-requests.reject', $request) }}">
-                                            @csrf
-                                            <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Reject"><i data-lucide="x"></i></button>
-                                        </form>
-                                    </div>
+                                <td style="font-size:12px;">{{ $request->borrow_date->format('d M Y') }}</td>
+                                <td style="font-size:12px;">
+                                    @php
+                                        $days = $request->borrow_date->diffInDays($request->due_date);
+                                    @endphp
+                                    {{ $days }} {{ $days == 1 ? 'day' : 'days' }}
                                 </td>
+                                <td><span class="badge badge-{{ $request->status }}">{{ ucfirst($request->status) }}</span></td>
                             </tr>
                         @empty
-                            <tr><td colspan="5">
+                            <tr><td colspan="6">
                                 <div class="empty-state">
                                     <i data-lucide="inbox"></i>
                                     <p class="empty-title">No pending requests</p>
@@ -99,6 +96,7 @@
             </div>
         </div>
 
+        {{-- Active Borrows --}}
         <div class="table-card">
             <div class="table-header">
                 <h3 class="table-title">Active Borrows</h3>
@@ -108,8 +106,10 @@
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th>Borrow ID</th>
                             <th>User</th>
                             <th>Asset</th>
+                            <th>Borrow Date</th>
                             <th>Due Date</th>
                             <th>Status</th>
                         </tr>
@@ -117,6 +117,7 @@
                     <tbody>
                         @forelse($activeBorrowings as $borrow)
                             <tr>
+                                <td class="font-mono">BRW-{{ str_pad($borrow->id, 4, '0', STR_PAD_LEFT) }}</td>
                                 <td>
                                     <div style="display:flex;align-items:center;gap:8px;">
                                         <div class="avatar-circle" style="width:30px;height:30px;font-size:11px;">{{ strtoupper(substr($borrow->user->name, 0, 1)) }}</div>
@@ -124,11 +125,12 @@
                                     </div>
                                 </td>
                                 <td>{{ $borrow->asset->asset_name }}</td>
-                                <td>{{ $borrow->due_date->format('d M Y') }}</td>
+                                <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
+                                <td style="font-size:12px;">{{ $borrow->due_date->format('d M Y') }}</td>
                                 <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
                             </tr>
                         @empty
-                            <tr><td colspan="4">
+                            <tr><td colspan="6">
                                 <div class="empty-state">
                                     <i data-lucide="inbox"></i>
                                     <p class="empty-title">No active borrows</p>
@@ -148,10 +150,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('monthlyChart').getContext('2d');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const data = @json($monthlyData);
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(14, 165, 233, 0.2)');
-    gradient.addColorStop(1, 'rgba(14, 165, 233, 0.01)');
 
     new Chart(ctx, {
         type: 'bar',
