@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -68,6 +70,22 @@ class UserController extends Controller
         $user->update($data);
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully!');
+    }
+
+    public function resetPassword(User $user)
+    {
+        $newPassword = Str::random(10);
+        $user->update(['password' => $newPassword]);
+
+        Notification::send(
+            $user->id,
+            'password_reset',
+            'Password Reset by Admin',
+            "Your password has been reset by admin. New password: {$newPassword}. Please change it after login.",
+            ['user_id' => $user->id]
+        );
+
+        return back()->with('success', "Password reset for {$user->name}. New password: {$newPassword}");
     }
 
     public function destroy(User $user)

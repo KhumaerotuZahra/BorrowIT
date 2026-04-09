@@ -38,20 +38,23 @@
                         <input type="hidden" name="status" value="{{ request('status') }}">
                     @endif
                 </form>
+                <button class="btn btn-primary" onclick="openModal('admin-borrow-modal')">
+                    <i data-lucide="plus"></i>
+                    + Request
+                </button>
             </div>
         </div>
         <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>No</th>
                         <th>User</th>
                         <th>Asset</th>
-                        <th>Qty</th>
-                        <th>Borrow Date</th>
-                        <th>Due Date</th>
-                        <th>Purpose</th>
+                        <th>Request Date</th>
+                        <th>Duration</th>
                         <th>Status</th>
+                        <th>Approve Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -72,11 +75,17 @@
                                 <div style="font-weight:500;">{{ $borrow->asset->asset_name }}</div>
                                 <div class="font-mono" style="font-size:11px;color:var(--text-muted);">{{ $borrow->asset->asset_id }}</div>
                             </td>
-                            <td>{{ $borrow->quantity }}</td>
-                            <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
-                            <td style="font-size:12px;">{{ $borrow->due_date->format('d M Y') }}</td>
-                            <td style="max-width:150px;" class="text-truncate">{{ $borrow->purpose ?? '-' }}</td>
+                            <td style="font-size:12px;">{{ $borrow->created_at->format('d M Y') }}</td>
+                            <td style="font-size:12px;">
+                                @php
+                                    $days = $borrow->borrow_date->diffInDays($borrow->due_date);
+                                @endphp
+                                {{ $days }} {{ $days == 1 ? 'day' : 'days' }}
+                            </td>
                             <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
+                            <td style="font-size:12px;">
+                                {{ $borrow->approved_date ? \Carbon\Carbon::parse($borrow->approved_date)->format('d M Y') : '-' }}
+                            </td>
                             <td>
                                 <div class="action-btns">
                                     @if($borrow->status === 'pending')
@@ -93,7 +102,7 @@
                                             </button>
                                         </form>
                                     @elseif($borrow->status === 'approved')
-                                        <button class="btn btn-primary btn-sm" onclick="openHandoverModal({{ $borrow->id }}, '{{ addslashes($borrow->asset->asset_name) }}', '{{ $borrow->user->name }}')">
+                                        <button class="btn btn-primary btn-sm" onclick="openHandoverModal({{ $borrow->id }}, '{{ addslashes($borrow->asset->asset_name) }}', '{{ $borrow->user->name }}', '{{ $borrow->borrow_date->format('Y-m-d') }}')">
                                             <i data-lucide="hand-metal"></i>
                                             Hand Over
                                         </button>
@@ -104,11 +113,10 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9">
+                        <tr><td colspan="8">
                             <div class="empty-state">
                                 <i data-lucide="inbox"></i>
                                 <p class="empty-title">No borrow requests found</p>
-                                <p class="empty-desc">Requests will appear here when users submit them.</p>
                             </div>
                         </td></tr>
                     @endforelse
@@ -124,6 +132,66 @@
 @endsection
 
 @push('modals')
+{{-- Admin Create Borrow Request Modal --}}
+<div class="modal" id="admin-borrow-modal" style="display:none;">
+    <div class="modal-header">
+        <h3 class="modal-title">New Borrow Request</h3>
+        <button class="modal-close" onclick="closeAllModals()"><i data-lucide="x"></i></button>
+    </div>
+    <form method="POST" action="{{ route('admin.borrow-requests.store') }}">
+        @csrf
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">User (Borrower)</label>
+                <select class="form-control" name="user_id" required id="user-search-select">
+                    <option value="">Search and select user...</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->department }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Asset</label>
+                <select class="form-control" name="asset_id" required id="admin-asset-select" onchange="updateAdminStock()">
+                    <option value="">Choose an asset to borrow</option>
+                    @foreach($assets as $asset)
+                        <option value="{{ $asset->id }}" data-stock="{{ $asset->available_stock }}">
+                            {{ $asset->asset_name }} ({{ $asset->asset_id }}) - Stock: {{ $asset->available_stock }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Quantity</label>
+                <input type="number" class="form-control" name="quantity" id="admin-qty-input" required min="1" value="1">
+                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;" id="admin-stock-info"></small>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Borrow Date</label>
+                    <input type="date" class="form-control" name="borrow_date" required value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Due Date (Return by)</label>
+                    <input type="date" class="form-control" name="due_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Purpose (Optional)</label>
+                <textarea class="form-control" name="purpose" placeholder="Purpose of borrowing..." rows="3" maxlength="500"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="send"></i>
+                Submit Request
+            </button>
+        </div>
+    </form>
+</div>
+
+{{-- Hand Over Modal --}}
 <div class="modal" id="handover-modal" style="display:none;">
     <div class="modal-header">
         <h3 class="modal-title">Hand Over Asset</h3>
@@ -136,8 +204,12 @@
                 <p style="font-size:13px;color:var(--accent);font-weight:600;" id="handover-info"></p>
             </div>
             <div class="form-group">
-                <label class="form-label">Handed Over By</label>
-                <input type="text" class="form-control" name="handover_by" required placeholder="Name of person handing over the asset" value="{{ auth()->user()->name }}">
+                <label class="form-label">Borrow Date</label>
+                <input type="date" class="form-control" name="borrow_date" id="handover-borrow-date" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Handover PIC</label>
+                <input type="text" class="form-control" name="handover_by" required placeholder="Person handing over the asset" value="{{ auth()->user()->name }}">
             </div>
             <div class="form-group">
                 <label class="form-label">Notes (Optional)</label>
@@ -157,11 +229,27 @@
 
 @push('scripts')
 <script>
-function openHandoverModal(id, assetName, userName) {
+function openHandoverModal(id, assetName, userName, borrowDate) {
     document.getElementById('handover-form').action = '/admin/borrow-requests/' + id + '/handover';
     document.getElementById('handover-info').textContent = 'Handing over "' + assetName + '" to ' + userName;
+    document.getElementById('handover-borrow-date').value = borrowDate;
     openModal('handover-modal');
     lucide.createIcons();
+}
+
+function updateAdminStock() {
+    const sel = document.getElementById('admin-asset-select');
+    const info = document.getElementById('admin-stock-info');
+    const qtyInput = document.getElementById('admin-qty-input');
+    const opt = sel.options[sel.selectedIndex];
+    if (opt.value) {
+        const stock = parseInt(opt.dataset.stock);
+        info.textContent = 'Available stock: ' + stock;
+        qtyInput.max = stock;
+    } else {
+        info.textContent = '';
+        qtyInput.removeAttribute('max');
+    }
 }
 </script>
 @endpush

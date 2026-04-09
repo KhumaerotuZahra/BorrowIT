@@ -58,8 +58,34 @@ class Borrowing extends Model
 
     public static function checkAndUpdateOverdue()
     {
-        self::where('status', 'active')
+        $overdueBorrowings = self::with(['user', 'asset'])
+            ->where('status', 'active')
             ->where('due_date', '<', Carbon::now())
-            ->update(['status' => 'overdue']);
+            ->get();
+
+        foreach ($overdueBorrowings as $borrow) {
+            $borrow->update(['status' => 'overdue']);
+
+            // Notify user
+            Notification::send(
+                $borrow->user_id,
+                'borrow_overdue',
+                'Overdue: Please Return Asset',
+                "Your borrowed asset \"{$borrow->asset->asset_name}\" is overdue (due: {$borrow->due_date->format('d M Y')}). Please return it immediately.",
+                ['borrowing_id' => $borrow->id]
+            );
+
+            // Notify all admins
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                Notification::send(
+                    $admin->id,
+                    'borrow_overdue',
+                    'Overdue Borrowing Alert',
+                    "Asset \"{$borrow->asset->asset_name}\" borrowed by {$borrow->user->name} is overdue (due: {$borrow->due_date->format('d M Y')}).",
+                    ['borrowing_id' => $borrow->id]
+                );
+            }
+        }
     }
 }

@@ -26,11 +26,10 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>No</th>
                         <th>Asset ID</th>
                         <th>Asset Number</th>
                         <th>Asset Name</th>
-                        <th>Total Stock</th>
                         <th>Available</th>
                         <th>Actions</th>
                     </tr>
@@ -42,7 +41,6 @@
                             <td><span class="font-mono" style="color:var(--accent);font-weight:600;">{{ $asset->asset_id }}</span></td>
                             <td><span class="font-mono">{{ $asset->asset_number }}</span></td>
                             <td style="font-weight:500;">{{ $asset->asset_name }}</td>
-                            <td>{{ $asset->total_stock }}</td>
                             <td>
                                 <span class="badge {{ $asset->available_stock > 0 ? 'badge-active' : 'badge-overdue' }}">
                                     {{ $asset->available_stock }}
@@ -64,7 +62,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7">
+                        <tr><td colspan="6">
                             <div class="empty-state">
                                 <i data-lucide="package"></i>
                                 <p class="empty-title">No assets found</p>

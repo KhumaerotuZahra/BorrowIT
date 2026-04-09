@@ -22,8 +22,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Borrow ID</th>
-                        <th>Request ID</th>
+                        <th>No</th>
                         <th>User</th>
                         <th>Asset</th>
                         <th>Borrow Date</th>
@@ -36,8 +35,7 @@
                 <tbody>
                     @forelse($borrowings as $index => $borrow)
                         <tr>
-                            <td class="font-mono">BRW-{{ str_pad($borrow->id, 4, '0', STR_PAD_LEFT) }}</td>
-                            <td class="font-mono">REQ-{{ str_pad($borrow->id, 4, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{ $borrowings->firstItem() + $index }}</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <div class="avatar-circle" style="width:30px;height:30px;font-size:11px;">{{ strtoupper(substr($borrow->user->name, 0, 1)) }}</div>
@@ -60,33 +58,15 @@
                                     </div>
                                 @endif
                             </td>
-                            {{-- Handover PIC - Select Employee IT --}}
-                            <td>
-                                @if(in_array($borrow->status, ['active', 'overdue']))
-                                    <form method="POST" action="{{ route('admin.active-borrows.update', $borrow) }}" class="inline-form">
-                                        @csrf
-                                        @method('PUT')
-                                        <select name="handover_by" class="form-control form-control-sm" style="min-width:130px;padding:5px 8px;font-size:12px;" onchange="this.form.submit()">
-                                            <option value="">Select PIC</option>
-                                            @foreach($itEmployees as $emp)
-                                                <option value="{{ $emp->name }}" {{ $borrow->handover_by == $emp->name ? 'selected' : '' }}>{{ $emp->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </form>
-                                @else
-                                    <span style="font-size:12px;">{{ $borrow->handover_by ?? '-' }}</span>
-                                @endif
-                            </td>
-                            {{-- Status - Select with auto overdue --}}
+                            <td style="font-size:12px;">{{ $borrow->handover_by ?? '-' }}</td>
                             <td>
                                 @if($borrow->status === 'overdue')
                                     <span class="badge badge-overdue">Overdue</span>
-                                    <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Auto-detected</div>
                                 @elseif(in_array($borrow->status, ['active']))
                                     <form method="POST" action="{{ route('admin.active-borrows.update', $borrow) }}" class="inline-form">
                                         @csrf
                                         @method('PUT')
-                                        <select name="status" class="form-control form-control-sm" style="min-width:110px;padding:5px 8px;font-size:12px;" onchange="this.form.submit()">
+                                        <select name="status" class="form-control form-control-sm" style="min-width:110px;" onchange="this.form.submit()">
                                             <option value="active" {{ $borrow->status == 'active' ? 'selected' : '' }}>Active</option>
                                             <option value="returned">Returned</option>
                                         </select>
@@ -95,28 +75,16 @@
                                     <span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span>
                                 @endif
                             </td>
-                            {{-- Return PIC - Select Employee IT --}}
-                            <td>
+                            <td style="font-size:12px;">
                                 @if(in_array($borrow->status, ['active', 'overdue']))
-                                    <form method="POST" action="{{ route('admin.active-borrows.update', $borrow) }}" class="inline-form">
-                                        @csrf
-                                        @method('PUT')
-                                        <select name="return_pic" class="form-control form-control-sm" style="min-width:130px;padding:5px 8px;font-size:12px;" onchange="this.form.submit()">
-                                            <option value="">Select PIC</option>
-                                            @foreach($itEmployees as $emp)
-                                                <option value="{{ $emp->name }}" {{ $borrow->return_pic == $emp->name ? 'selected' : '' }}>{{ $emp->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </form>
-                                @elseif($borrow->status === 'returned')
-                                    <span style="font-size:12px;">{{ $borrow->return_pic ?? '-' }}</span>
+                                    <span style="color:var(--text-muted);">{{ auth()->user()->name }}</span>
                                 @else
-                                    <span style="font-size:12px;">-</span>
+                                    {{ $borrow->return_pic ?? '-' }}
                                 @endif
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9">
+                        <tr><td colspan="8">
                             <div class="empty-state">
                                 <i data-lucide="inbox"></i>
                                 <p class="empty-title">No active borrows</p>

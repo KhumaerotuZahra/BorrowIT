@@ -37,25 +37,18 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Asset</th>
-                        <th>Qty</th>
+                        <th>Borrow ID</th>
+                        <th>Asset Name</th>
                         <th>Borrow Date</th>
                         <th>Due Date</th>
-                        <th>Return Date</th>
-                        <th>Purpose</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($borrowings as $index => $borrow)
                         <tr>
-                            <td>{{ $borrowings->firstItem() + $index }}</td>
-                            <td>
-                                <div style="font-weight:500;">{{ $borrow->asset->asset_name }}</div>
-                                <div class="font-mono" style="font-size:11px;color:var(--text-muted);">{{ $borrow->asset->asset_id }}</div>
-                            </td>
-                            <td>{{ $borrow->quantity }}</td>
+                            <td class="font-mono">BRW-{{ str_pad($borrow->id, 4, '0', STR_PAD_LEFT) }}</td>
+                            <td style="font-weight:500;">{{ $borrow->asset->asset_name }}</td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">
                                 {{ $borrow->due_date->format('d M Y') }}
@@ -65,8 +58,6 @@
                                     </div>
                                 @endif
                             </td>
-                            <td style="font-size:12px;">{{ $borrow->return_date ? $borrow->return_date->format('d M Y') : '-' }}</td>
-                            <td style="max-width:120px;" class="text-truncate">{{ $borrow->purpose ?? '-' }}</td>
                             <td>
                                 <span class="badge badge-{{ $borrow->status }}">
                                     {{ ucfirst($borrow->status) }}
@@ -74,7 +65,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8">
+                        <tr><td colspan="5">
                             <div class="empty-state">
                                 <i data-lucide="book-open"></i>
                                 <p class="empty-title">No borrowings yet</p>
@@ -90,20 +81,6 @@
                 {{ $borrowings->withQueryString()->links() }}
             </div>
         @endif
-    </div>
-
-    <div style="padding:16px 24px;margin-top:-12px;margin-bottom:24px;">
-        <div style="padding:16px 20px;background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);box-shadow:var(--shadow-sm);">
-            <h4 style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">Status Guide</h4>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text-secondary);line-height:1.6;">
-                <div><span class="badge badge-pending">Pending</span> Request awaiting admin review</div>
-                <div><span class="badge badge-approved">Approved</span> Request approved, awaiting handover</div>
-                <div><span class="badge badge-rejected">Rejected</span> Request was declined</div>
-                <div><span class="badge badge-active">Active</span> Asset currently in your possession</div>
-                <div><span class="badge badge-overdue">Overdue</span> Past the due date for return</div>
-                <div><span class="badge badge-returned">Returned</span> Asset successfully returned</div>
-            </div>
-        </div>
     </div>
 @endsection
 
@@ -129,7 +106,7 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Quantity</label>
-                <input type="number" class="form-control" name="quantity" id="quantity-input" required min="1" value="1" placeholder="How many items?">
+                <input type="number" class="form-control" name="quantity" id="quantity-input" required min="1" value="1">
                 <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;" id="stock-info"></small>
             </div>
             <div class="form-row">

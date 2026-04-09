@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('/assets', [AssetController::class, 'index'])->name('assets.index');
@@ -56,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/assets/{asset}', [AssetController::class, 'destroy'])->name('assets.destroy');
 
         Route::get('/borrow-requests', [BorrowRequestController::class, 'index'])->name('borrow-requests.index');
+        Route::post('/borrow-requests', [BorrowRequestController::class, 'adminStore'])->name('borrow-requests.store');
         Route::post('/borrow-requests/{borrowing}/approve', [BorrowRequestController::class, 'approve'])->name('borrow-requests.approve');
         Route::post('/borrow-requests/{borrowing}/reject', [BorrowRequestController::class, 'reject'])->name('borrow-requests.reject');
         Route::post('/borrow-requests/{borrowing}/handover', [BorrowRequestController::class, 'handover'])->name('borrow-requests.handover');
@@ -74,5 +76,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
         Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
         Route::post('/borrowings', [BorrowingController::class, 'store'])->name('borrowings.store');
+        Route::get('/notifications', [NotificationController::class, 'userIndex'])->name('notifications.index');
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     });
 });

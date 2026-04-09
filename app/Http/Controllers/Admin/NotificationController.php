@@ -17,6 +17,15 @@ class NotificationController extends Controller
         return view('admin.notifications.index', compact('notifications'));
     }
 
+    public function userIndex()
+    {
+        $notifications = Notification::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('user.notifications.index', compact('notifications'));
+    }
+
     public function markRead(Notification $notification)
     {
         $notification->update(['read_at' => now()]);

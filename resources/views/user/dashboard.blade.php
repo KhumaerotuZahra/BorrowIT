@@ -36,8 +36,8 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Asset</th>
-                            <th>Qty</th>
+                            <th>Asset Name</th>
+                            <th>Borrow Date</th>
                             <th>Due Date</th>
                             <th>Status</th>
                         </tr>
@@ -45,11 +45,8 @@
                     <tbody>
                         @forelse($myBorrowedAssets as $borrow)
                             <tr>
-                                <td>
-                                    <div style="font-weight:500;">{{ $borrow->asset->asset_name }}</div>
-                                    <div class="font-mono" style="font-size:11px;color:var(--text-muted);">{{ $borrow->asset->asset_id }}</div>
-                                </td>
-                                <td>{{ $borrow->quantity }}</td>
+                                <td style="font-weight:500;">{{ $borrow->asset->asset_name }}</td>
+                                <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                                 <td style="font-size:12px;">
                                     {{ $borrow->due_date->format('d M Y') }}
                                     @if($borrow->status === 'overdue')
@@ -77,6 +74,7 @@
         <div class="table-card">
             <div class="table-header">
                 <h3 class="table-title">Recent Notifications</h3>
+                <a href="{{ route('user.notifications.index') }}" class="btn btn-outline btn-sm">View All</a>
             </div>
             @forelse($notifications as $notif)
                 <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 24px;border-bottom:1px solid var(--border-light);{{ $notif->isRead() ? '' : 'background:var(--accent-light);' }}">
@@ -85,6 +83,7 @@
                         @elseif($notif->type === 'borrow_rejected') background:var(--danger-light);color:var(--danger);
                         @elseif($notif->type === 'borrow_handover') background:var(--accent-light);color:var(--accent);
                         @elseif($notif->type === 'borrow_returned') background:var(--info-light);color:var(--info);
+                        @elseif($notif->type === 'borrow_overdue') background:var(--danger-light);color:var(--danger);
                         @else background:var(--warning-light);color:var(--warning);
                         @endif
                     ">
@@ -96,6 +95,8 @@
                             <i data-lucide="hand-metal" style="width:16px;height:16px;"></i>
                         @elseif($notif->type === 'borrow_returned')
                             <i data-lucide="undo-2" style="width:16px;height:16px;"></i>
+                        @elseif($notif->type === 'borrow_overdue')
+                            <i data-lucide="alert-triangle" style="width:16px;height:16px;"></i>
                         @else
                             <i data-lucide="bell" style="width:16px;height:16px;"></i>
                         @endif
@@ -105,6 +106,14 @@
                         <div style="font-size:12px;color:var(--text-secondary);line-height:1.4;">{{ $notif->message }}</div>
                         <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">{{ $notif->created_at->diffForHumans() }}</div>
                     </div>
+                    @if(!$notif->isRead())
+                        <form method="POST" action="{{ route('user.notifications.read', $notif) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-ghost btn-sm btn-icon" title="Mark as read">
+                                <i data-lucide="check" style="width:14px;height:14px;"></i>
+                            </button>
+                        </form>
+                    @endif
                 </div>
             @empty
                 <div class="empty-state">

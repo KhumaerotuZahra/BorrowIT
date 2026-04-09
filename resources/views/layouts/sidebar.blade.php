@@ -9,7 +9,7 @@
     </div>
     <nav class="sidebar-nav">
         @if($isAdmin)
-            <a href="{{ route('admin.dashboard') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.dashboard') || $currentRoute === 'admin.monthly-borrowing' ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}" class="nav-item {{ $currentRoute === 'admin.dashboard' ? 'active' : '' }}">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </a>
@@ -29,6 +29,10 @@
                 <i data-lucide="repeat"></i>
                 <span>Active Borrow</span>
             </a>
+            <a href="{{ route('admin.monthly-borrowing') }}" class="nav-item {{ $currentRoute === 'admin.monthly-borrowing' ? 'active' : '' }}">
+                <i data-lucide="bar-chart-3"></i>
+                <span>Monthly Borrowing</span>
+            </a>
             <a href="{{ route('admin.notifications.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.notifications') ? 'active' : '' }}">
                 <i data-lucide="bell"></i>
                 <span>Notification</span>
@@ -41,6 +45,10 @@
             <a href="{{ route('user.borrowings.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'user.borrowings') ? 'active' : '' }}">
                 <i data-lucide="book-open"></i>
                 <span>My Borrowings</span>
+            </a>
+            <a href="{{ route('user.notifications.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'user.notifications') ? 'active' : '' }}">
+                <i data-lucide="bell"></i>
+                <span>Notifications</span>
             </a>
         @endif
     </nav>
