@@ -29,10 +29,6 @@
                 <i data-lucide="repeat"></i>
                 <span>Active Borrow</span>
             </a>
-            <a href="{{ route('admin.monthly-borrowing') }}" class="nav-item {{ $currentRoute === 'admin.monthly-borrowing' ? 'active' : '' }}">
-                <i data-lucide="bar-chart-3"></i>
-                <span>Monthly Borrowing</span>
-            </a>
             <a href="{{ route('admin.notifications.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.notifications') ? 'active' : '' }}">
                 <i data-lucide="bell"></i>
                 <span>Notification</span>
