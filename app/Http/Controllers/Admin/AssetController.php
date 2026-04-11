@@ -21,7 +21,7 @@ class AssetController extends Controller
             });
         }
 
-        $assets = $query->orderBy('created_at', 'desc')->paginate(10);
+        $assets = $query->orderBy('created_at', 'asc')->paginate(10);
 
         return view('admin.assets.index', compact('assets'));
     }

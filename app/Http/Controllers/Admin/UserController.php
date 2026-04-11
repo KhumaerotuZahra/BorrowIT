@@ -27,7 +27,7 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        $users = $query->orderBy('created_at', 'desc')->paginate(10);
+        $users = $query->orderBy('created_at', 'asc')->paginate(10);
         $departments = ['IT', 'HR', 'Finance', 'Marketing', 'Operations', 'Engineering', 'Sales', 'Support'];
 
         return view('admin.users.index', compact('users', 'departments'));
