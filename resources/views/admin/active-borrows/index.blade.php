@@ -29,6 +29,7 @@
                         <th>Due Date</th>
                         <th>Handover PIC</th>
                         <th>Status</th>
+                        <th>Return PIC</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -60,6 +61,7 @@
                             </td>
                             <td style="font-size:12px;">{{ $borrow->handover_by ?? '-' }}</td>
                             <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
+                            <td style="font-size:12px;">{{ $borrow->return_pic ?? '-' }}</td>
                             <td>
                                 @if(in_array($borrow->status, ['active', 'overdue']))
                                     <button class="btn btn-primary btn-sm" onclick="openReturnModal({{ $borrow->id }}, '{{ addslashes($borrow->asset->asset_name) }}', '{{ $borrow->user->name }}')">
@@ -72,7 +74,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8">
+                        <tr><td colspan="9">
                             <div class="empty-state">
                                 <i data-lucide="inbox"></i>
                                 <p class="empty-title">No active borrows</p>
