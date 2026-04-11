@@ -16,6 +16,11 @@
                     <i data-lucide="search"></i>
                     <input type="text" name="search" placeholder="Search users..." value="{{ request('search') }}">
                 </form>
+                <div class="filter-btns" style="display:flex;gap:6px;">
+                    <a href="{{ route('admin.users.index', array_merge(request()->except('role'), [])) }}" class="btn {{ !request('role') ? 'btn-primary' : 'btn-outline' }} btn-sm">All</a>
+                    <a href="{{ route('admin.users.index', array_merge(request()->except('role'), ['role' => 'admin'])) }}" class="btn {{ request('role') === 'admin' ? 'btn-primary' : 'btn-outline' }} btn-sm">Admin</a>
+                    <a href="{{ route('admin.users.index', array_merge(request()->except('role'), ['role' => 'user'])) }}" class="btn {{ request('role') === 'user' ? 'btn-primary' : 'btn-outline' }} btn-sm">User</a>
+                </div>
                 <button class="btn btn-primary" onclick="openModal('add-user-modal')">
                     <i data-lucide="plus"></i>
                     Add User
@@ -52,14 +57,6 @@
                                     <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->email }}', '{{ $user->department }}', '{{ $user->role }}')" title="Edit">
                                         <i data-lucide="pencil"></i>
                                     </button>
-                                    @if($user->role === 'admin' && $user->id !== auth()->id())
-                                        <form method="POST" action="{{ route('admin.users.reset-password', $user) }}" onsubmit="return confirm('Reset password for {{ $user->name }}?')">
-                                            @csrf
-                                            <button type="submit" class="btn btn-ghost btn-sm btn-icon" style="color:var(--warning);" title="Reset Password">
-                                                <i data-lucide="key-round"></i>
-                                            </button>
-                                        </form>
-                                    @endif
                                     @if($user->id !== auth()->id())
                                         <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Are you sure you want to delete this user?')">
                                             @csrf
@@ -157,8 +154,25 @@
                 <input type="email" class="form-control" name="email" id="edit-email" required>
             </div>
             <div class="form-group">
-                <label class="form-label">New Password (leave blank to keep current)</label>
-                <input type="password" class="form-control" name="password" placeholder="Leave blank to keep current">
+                <label class="form-label">Reset Password</label>
+                <div style="display:flex;gap:20px;align-items:center;margin-top:4px;">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                        <input type="radio" name="reset_password" value="no" checked onclick="toggleResetPw(false)"> No
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                        <input type="radio" name="reset_password" value="yes" onclick="toggleResetPw(true)"> Yes
+                    </label>
+                </div>
+            </div>
+            <div id="reset-pw-fields" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" class="form-control" name="password" id="edit-password" placeholder="Enter new password" minlength="8">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" name="password_confirmation" id="edit-password-confirm" placeholder="Confirm new password">
+                </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -195,8 +209,28 @@ function openEditUser(id, name, email, department, role) {
     document.getElementById('edit-email').value = email;
     document.getElementById('edit-department').value = department;
     document.getElementById('edit-role').value = role;
+    // Reset radio to No
+    document.querySelector('input[name="reset_password"][value="no"]').checked = true;
+    toggleResetPw(false);
     openModal('edit-user-modal');
     lucide.createIcons();
+}
+
+function toggleResetPw(show) {
+    const fields = document.getElementById('reset-pw-fields');
+    const pwInput = document.getElementById('edit-password');
+    const pwConfirm = document.getElementById('edit-password-confirm');
+    if (show) {
+        fields.style.display = 'block';
+        pwInput.required = true;
+        pwConfirm.required = true;
+    } else {
+        fields.style.display = 'none';
+        pwInput.required = false;
+        pwConfirm.required = false;
+        pwInput.value = '';
+        pwConfirm.value = '';
+    }
 }
 </script>
 @endpush

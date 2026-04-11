@@ -10,7 +10,7 @@
 
     <div class="table-card">
         <div class="table-header">
-            <h3 class="table-title">Active Loans</h3>
+            <h3 class="table-title">Active Borrows</h3>
             <div class="table-actions">
                 <form method="GET" action="{{ route('admin.active-borrows.index') }}" class="search-box">
                     <i data-lucide="search"></i>
@@ -29,7 +29,7 @@
                         <th>Due Date</th>
                         <th>Handover PIC</th>
                         <th>Status</th>
-                        <th>Return PIC</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,27 +59,15 @@
                                 @endif
                             </td>
                             <td style="font-size:12px;">{{ $borrow->handover_by ?? '-' }}</td>
+                            <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
                             <td>
-                                @if($borrow->status === 'overdue')
-                                    <span class="badge badge-overdue">Overdue</span>
-                                @elseif(in_array($borrow->status, ['active']))
-                                    <form method="POST" action="{{ route('admin.active-borrows.update', $borrow) }}" class="inline-form">
-                                        @csrf
-                                        @method('PUT')
-                                        <select name="status" class="form-control form-control-sm" style="min-width:110px;" onchange="this.form.submit()">
-                                            <option value="active" {{ $borrow->status == 'active' ? 'selected' : '' }}>Active</option>
-                                            <option value="returned">Returned</option>
-                                        </select>
-                                    </form>
-                                @else
-                                    <span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span>
-                                @endif
-                            </td>
-                            <td style="font-size:12px;">
                                 @if(in_array($borrow->status, ['active', 'overdue']))
-                                    <span style="color:var(--text-muted);">{{ auth()->user()->name }}</span>
-                                @else
-                                    {{ $borrow->return_pic ?? '-' }}
+                                    <button class="btn btn-primary btn-sm" onclick="openReturnModal({{ $borrow->id }}, '{{ addslashes($borrow->asset->asset_name) }}', '{{ $borrow->user->name }}')">
+                                        <i data-lucide="undo-2"></i>
+                                        Return
+                                    </button>
+                                @elseif($borrow->status === 'returned')
+                                    <span style="font-size:12px;color:var(--text-muted);">-</span>
                                 @endif
                             </td>
                         </tr>
@@ -102,3 +90,46 @@
         @endif
     </div>
 @endsection
+
+@push('modals')
+<div class="modal" id="return-modal" style="display:none;">
+    <div class="modal-header">
+        <h3 class="modal-title">Return Asset</h3>
+        <button class="modal-close" onclick="closeAllModals()"><i data-lucide="x"></i></button>
+    </div>
+    <form method="POST" id="return-form">
+        @csrf
+        <div class="modal-body">
+            <div style="padding:14px;background:var(--accent-light);border-radius:var(--radius);margin-bottom:18px;">
+                <p style="font-size:13px;color:var(--accent);font-weight:600;" id="return-info"></p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Return PIC</label>
+                <input type="text" class="form-control" name="return_pic" value="{{ auth()->user()->name }}" required placeholder="Person receiving the return">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes (Optional)</label>
+                <textarea class="form-control" name="return_notes" placeholder="Any notes about the return..." rows="3"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="check-circle"></i>
+                Confirm Return
+            </button>
+        </div>
+    </form>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+function openReturnModal(id, assetName, userName) {
+    document.getElementById('return-form').action = '/admin/active-borrows/' + id + '/return';
+    document.getElementById('return-info').textContent = 'Returning "' + assetName + '" from ' + userName;
+    openModal('return-modal');
+    lucide.createIcons();
+}
+</script>
+@endpush

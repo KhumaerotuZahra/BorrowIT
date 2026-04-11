@@ -1178,3 +1178,55 @@ select.form-control-sm {
     cursor: pointer;
 }
 
+/* ================================= */
+/* CUSTOM PAGINATION */
+/* ================================= */
+.custom-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px 0;
+}
+
+.pg-arrow, .pg-num, .pg-dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.pg-arrow {
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.pg-num:hover, .pg-arrow:hover:not(.disabled) {
+    background: var(--surface-2);
+    color: var(--text-primary);
+}
+
+.pg-num.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+.pg-arrow.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pg-dots {
+    color: var(--text-muted);
+    cursor: default;
+}
+

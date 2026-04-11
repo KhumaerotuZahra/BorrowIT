@@ -62,35 +62,18 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'current_password' => 'required',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = Auth::user();
 
-        $token = Str::random(64);
-
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $user->email],
-            [
-                'token' => Hash::make($token),
-                'created_at' => now(),
-            ]
-        );
-
-        try {
-            Mail::send('emails.reset-password', [
-                'token' => $token,
-                'email' => $user->email,
-                'name' => $user->name,
-            ], function ($message) use ($user) {
-                $message->to($user->email);
-                $message->subject('BorrowIT - Change Password');
-            });
-
-            return back()->with('success', 'Password reset link has been sent to your email!');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to send email. Please contact your administrator.');
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
+
+        $user->update(['password' => $request->password]);
+        return back()->with('success', 'Password changed successfully!');
     }
 
     public function showForgotPassword()
