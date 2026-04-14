@@ -11,7 +11,7 @@
             <div class="notification-dropdown" id="notification-dropdown" style="display:none;">
                 <div class="notif-header">
                     <h4>Notifications</h4>
-                    <a href="{{ auth()->user()->isAdmin() ? route('admin.notifications.index') : '#' }}">View All</a>
+                    <a href="{{ auth()->user()->isAdmin() ? route('admin.notifications.index') : route('user.notifications.index') }}">View All</a>
                 </div>
                 <div class="notif-list" id="notif-list">
                     <p class="notif-empty">No notifications</p>

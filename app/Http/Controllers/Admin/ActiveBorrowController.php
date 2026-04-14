@@ -25,7 +25,12 @@ class ActiveBorrowController extends Controller
             });
         }
 
-        $borrowings = $query->whereIn('status', ['active', 'overdue', 'returned'])
+        if ($request->filled('status')){
+            $query->where('status', $request->status);
+        }else{
+            $query->whereIn('status', ['active', 'overdue', 'returned']);
+        }
+        $borrowings = $query
             ->orderByRaw("FIELD(status, 'overdue', 'active', 'returned')")
             ->orderBy('created_at', 'desc')
             ->paginate(10);

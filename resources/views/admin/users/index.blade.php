@@ -16,11 +16,13 @@
                     <i data-lucide="search"></i>
                     <input type="text" name="search" placeholder="Search users..." value="{{ request('search') }}">
                 </form>
-                <div class="filter-btns" style="display:flex;gap:6px;">
-                    <a href="{{ route('admin.users.index', array_merge(request()->except('role'), [])) }}" class="btn {{ !request('role') ? 'btn-primary' : 'btn-outline' }} btn-sm">All</a>
-                    <a href="{{ route('admin.users.index', array_merge(request()->except('role'), ['role' => 'admin'])) }}" class="btn {{ request('role') === 'admin' ? 'btn-primary' : 'btn-outline' }} btn-sm">Admin</a>
-                    <a href="{{ route('admin.users.index', array_merge(request()->except('role'), ['role' => 'user'])) }}" class="btn {{ request('role') === 'user' ? 'btn-primary' : 'btn-outline' }} btn-sm">User</a>
-                </div>
+                <form method="GET" action="{{ route('admin.users.index') }}">
+                    <select name="role" class="form-control" onchange="this.form.submit()" style="width:auto;">
+                        <option value="">All</option>
+                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="user" {{ request('role') === 'user' ? 'selected' : '' }}>User</option>
+                    </select>
+                </form>
                 <button class="btn btn-primary" onclick="openModal('add-user-modal')">
                     <i data-lucide="plus"></i>
                     Add User

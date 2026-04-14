@@ -23,7 +23,7 @@
                 <label class="form-label" for="password_confirmation">Confirm New Password</label>
                 <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required placeholder="Confirm your new password">
             </div>
-            <div style="display:flex; gap:10px; margin-top:24px;">
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:24px;">
                 <button type="submit" class="btn btn-primary">
                     <i data-lucide="save"></i>
                     Update Password

@@ -9,21 +9,27 @@
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card accent">
-            <div class="stat-icon"><i data-lucide="repeat"></i></div>
-            <div class="stat-value">{{ $activeBorrows }}</div>
-            <div class="stat-label">My Active Borrows</div>
-        </div>
-        <div class="stat-card danger">
-            <div class="stat-icon"><i data-lucide="alert-triangle"></i></div>
-            <div class="stat-value">{{ $overdueCount }}</div>
-            <div class="stat-label">Overdue</div>
-        </div>
-        <div class="stat-card warning">
-            <div class="stat-icon"><i data-lucide="clock"></i></div>
-            <div class="stat-value">{{ $pendingRequests }}</div>
-            <div class="stat-label">Pending Requests</div>
-        </div>
+        <a href="{{ route('user.borrowings.index', ['status' => 'active']) }}" style="text-decoration:none;color:inherit;">
+            <div class="stat-card accent" style="cursor:pointer;">
+                <div class="stat-icon"><i data-lucide="repeat"></i></div>
+                <div class="stat-value">{{ $activeBorrows }}</div>
+                <div class="stat-label">My Active Borrows</div>
+            </div>
+        </a>
+        <a href="{{ route('user.borrowings.index', ['status' => 'overdue']) }}" style="text-decoration:none;color:inherit;">
+            <div class="stat-card danger" style="cursor:pointer;">
+                <div class="stat-icon"><i data-lucide="alert-triangle"></i></div>
+                <div class="stat-value">{{ $overdueCount }}</div>
+                <div class="stat-label">Overdue</div>
+            </div>
+        </a>
+        <a href="{{ route('user.borrowings.index', ['status' => 'pending']) }}" style="text-decoration:none;color:inherit;">
+            <div class="stat-card warning" style="cursor:pointer;">
+                <div class="stat-icon"><i data-lucide="clock"></i></div>
+                <div class="stat-value">{{ $pendingRequests }}</div>
+                <div class="stat-label">Pending Requests</div>
+            </div>
+        </a>
     </div>
 
     <div class="content-grid">

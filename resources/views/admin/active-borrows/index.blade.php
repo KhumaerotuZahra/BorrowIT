@@ -16,7 +16,16 @@
                     <i data-lucide="search"></i>
                     <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}">
                 </form>
+                <form method="GET" action="{{ route('admin.active-borrows.index') }}">
+                    <select name="status" class="form-control" onchange="this.form.submit()" style="width:auto;">
+                        <option value="">All</option>
+                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
+                        <option value="overdue" {{ request('status') === 'overdue' ? 'selected' : '' }}>Overdue</option>
+                    </select>
+                </form>
             </div>
+
         </div>
         <div class="table-responsive">
             <table class="data-table">
@@ -48,7 +57,7 @@
                             </td>
                             <td>
                                 <div style="font-weight:500;">{{ $borrow->asset->asset_name }}</div>
-                                <div class="font-mono" style="font-size:11px;color:var(--text-muted);">{{ $borrow->asset->asset_id }}</div>
+                                <div class="font-mono" style="font-size:11px;color:var(--text-muted);">{{ $borrow->asset->asset_number }}</div>
                             </td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">

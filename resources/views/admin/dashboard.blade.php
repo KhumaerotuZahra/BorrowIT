@@ -9,26 +9,34 @@
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card accent">
-            <div class="stat-icon"><i data-lucide="package"></i></div>
-            <div class="stat-value">{{ $totalAssets }}</div>
-            <div class="stat-label">Total Assets</div>
-        </div>
-        <div class="stat-card success">
-            <div class="stat-icon"><i data-lucide="check-circle"></i></div>
-            <div class="stat-value">{{ $availableStock }}</div>
-            <div class="stat-label">Available Stock</div>
-        </div>
-        <div class="stat-card warning">
-            <div class="stat-icon"><i data-lucide="clock"></i></div>
-            <div class="stat-value">{{ $pendingRequests }}</div>
-            <div class="stat-label">Pending Requests</div>
-        </div>
-        <div class="stat-card danger">
-            <div class="stat-icon"><i data-lucide="repeat"></i></div>
-            <div class="stat-value">{{ $activeBorrows }}</div>
-            <div class="stat-label">Active Borrows</div>
-        </div>
+        <a href="{{ route('admin.assets.index') }}" style="text-decoration:none;color:inherit;">
+            <div class="stat-card accent">
+                <div class="stat-icon"><i data-lucide="package"></i></div>
+                <div class="stat-value">{{ $totalAssets }}</div>
+                <div class="stat-label">Total Assets</div>
+            </div>
+        </a>
+        <a href="{{ route('admin.assets.index', ['status' => 'available']) }}" style="text-decoration:none;color:inherit;">
+            <div class="stat-card success" style="cursor:pointer;">
+                <div class="stat-icon"><i data-lucide="check-circle"></i></div>
+                <div class="stat-value">{{ $availableStock }}</div>
+                <div class="stat-label">Available Stock</div>
+            </div>
+        </a>
+        <a href="{{ route('admin.borrow-requests.index', ['status' => 'pending']) }}" style="text-decoration:none;color:inherit;">
+            <div class="stat-card warning" style="cursor:pointer;">
+                <div class="stat-icon"><i data-lucide="clock"></i></div>
+                <div class="stat-value">{{ $pendingRequests }}</div>
+                <div class="stat-label">Pending Requests</div>
+            </div>
+        </a>
+        <a href="{{ route('admin.active-borrows.index', ['status' => 'active']) }}" style="text-decoration:none;color:inherit;">
+            <div class="stat-card danger" style="cursor:pointer;">
+                <div class="stat-icon"><i data-lucide="repeat"></i></div>
+                <div class="stat-value">{{ $activeBorrows }}</div>
+                <div class="stat-label">Active Borrows</div>
+            </div>
+        </a>
     </div>
 
     <div class="chart-card">

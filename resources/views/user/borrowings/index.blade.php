@@ -37,7 +37,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Borrow ID</th>
+                        <th>No</th>
                         <th>Asset Name</th>
                         <th>Borrow Date</th>
                         <th>Due Date</th>
@@ -47,7 +47,7 @@
                 <tbody>
                     @forelse($borrowings as $index => $borrow)
                         <tr>
-                            <td class="font-mono">BRW-{{ str_pad($borrow->id, 4, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{ $borrowings->firstItem() + $index }}</td>
                             <td style="font-weight:500;">{{ $borrow->asset->asset_name }}</td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">
@@ -99,15 +99,16 @@
                     <option value="">Choose an asset to borrow</option>
                     @foreach($assets as $asset)
                         <option value="{{ $asset->id }}" data-stock="{{ $asset->available_stock }}">
-                            {{ $asset->asset_name }} ({{ $asset->asset_id }}) - Stock: {{ $asset->available_stock }}
+                            {{ $asset->asset_name }} - {{ $asset->asset_number }} 
                         </option>
                     @endforeach
                 </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Quantity</label>
-                <input type="number" class="form-control" name="quantity" id="quantity-input" required min="1" value="1">
-                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;" id="stock-info"></small>
+                <input type="number" class="form-control" value="1" readonly>
+                <input type="hidden" name="quantity" value="1">
+                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;" id="admin-stock-info"></small>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -119,10 +120,10 @@
                     <input type="date" class="form-control" name="due_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}">
                 </div>
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label class="form-label">Purpose (Optional)</label>
                 <textarea class="form-control" name="purpose" placeholder="Why do you need this asset?" rows="3" maxlength="500"></textarea>
-            </div>
+            </div> -->
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>

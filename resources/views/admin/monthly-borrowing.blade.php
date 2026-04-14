@@ -46,7 +46,7 @@
     {{-- Most Borrowed Items --}}
     <div class="table-card">
         <div class="table-header">
-            <h3 class="table-title">MOST BORROWED ITEMS {{ strtoupper($monthLabel) }} {{ $year }}</h3>
+            <h3 class="table-title">Most Borrowed Items - {{ $monthLabel }} {{ $year }}</h3>
             <a href="{{ route('admin.monthly-borrowing.export-most-borrowed', ['year' => $year, 'month' => $month]) }}" class="btn btn-success btn-sm">
                 <i data-lucide="download"></i>
                 Export Excel
@@ -83,7 +83,7 @@
                         <tr><td colspan="3">
                             <div class="empty-state">
                                 <i data-lucide="trending-up"></i>
-                                <p class="empty-title">Belum ada data</p>
+                                <p class="empty-title">No Data Yet</p>
                             </div>
                         </td></tr>
                     @endforelse
@@ -95,7 +95,7 @@
     {{-- Returned Items --}}
     <div class="table-card">
         <div class="table-header">
-            <h3 class="table-title">Returned Items {{ $monthLabel }} {{ $year }}</h3>
+            <h3 class="table-title">Returned Items - {{ $monthLabel }} {{ $year }}</h3>
             <a href="{{ route('admin.monthly-borrowing.export-returned', ['year' => $year, 'month' => $month]) }}" class="btn btn-success btn-sm">
                 <i data-lucide="download"></i>
                 Export Excel
@@ -109,8 +109,8 @@
                         <th>Asset Name</th>
                         <th>Name</th>
                         <th>Borrow Date</th>
-                        <th>Due Date</th>
-                        <th>PIC Receiver</th>
+                        <th>Return Date</th>
+                        <th>Return PIC </th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -129,7 +129,7 @@
                         <tr><td colspan="7">
                             <div class="empty-state">
                                 <i data-lucide="undo-2"></i>
-                                <p class="empty-title">Belum ada data</p>
+                                <p class="empty-title">No Data Yet</p>
                             </div>
                         </td></tr>
                     @endforelse
@@ -141,7 +141,7 @@
     {{-- Borrow Detail --}}
     <div class="table-card">
         <div class="table-header">
-            <h3 class="table-title">BORROW DETAIL</h3>
+            <h3 class="table-title">Borrow Details - {{ $monthLabel }} {{ $year }}</h3>
             <a href="{{ route('admin.monthly-borrowing.export-borrowings', ['year' => $year, 'month' => $month]) }}" class="btn btn-success btn-sm">
                 <i data-lucide="download"></i>
                 Export Excel
