@@ -36,6 +36,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'employee_id' => 'required|unique:users,employee_id',
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'unique:users,email', 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
             'password' => 'required|string|min:8',
@@ -46,6 +47,7 @@ class UserController extends Controller
         ]);
 
         User::create([
+            'employee_id'=> $request->employee_id,
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
@@ -59,15 +61,17 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
+            'employee_id' => 'required|unique:users,employee_id',
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'unique:users,email,' . $user->id, 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
             'department' => 'required|string',
             'role' => 'required|in:admin,user',
+            'status' => 'required|in:active,inactive',
         ], [
             'email.regex' => 'Email must use the @ptbpi.co.id domain.',
         ]);
 
-        $data = $request->only(['name', 'email', 'department', 'role']);
+        $data = $request->only(['employee_id', 'name', 'email', 'department', 'role', 'status']);
 
         if ($request->filled('password')) {
             $data['password'] = $request->password;

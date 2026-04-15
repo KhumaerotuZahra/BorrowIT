@@ -33,6 +33,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th>Employee ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Department</th>
@@ -45,18 +46,21 @@
                     @forelse($users as $index => $user)
                         <tr>
                             <td>
-                                <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="avatar-circle" style="width:32px;height:32px;font-size:12px;">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
-                                    <span style="font-weight:500;">{{ $user->name }}</span>
-                                </div>
+                                {{ $user->employee_id ?? '-' }}
                             </td>
-                            <td style="color:var(--text-secondary);">{{ $user->email }}</td>
+                            <td>
+                                    <span style="font-weight:500;">{{ $user->name }}</span>
+                            </td>
+                            <td>{{ $user->email }}</td>
                             <td>{{ $user->department ?? '-' }}</td>
                             <td><span class="badge {{ $user->role === 'admin' ? 'badge-active' : 'badge-approved' }}">{{ ucfirst($user->role) }}</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
+                            <td><span class="badge {{ $user->status == 'active' ? 'badge-active' : 'badge-inactive' }}">
+                                {{ ucfirst($user->status) }}
+                                </span>
+                            </td>
                             <td>
                                 <div class="action-btns">
-                                    <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->email }}', '{{ $user->department }}', '{{ $user->role }}')" title="Edit">
+                                    <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->email }}', '{{ $user->department }}', '{{ $user->role }}', '{{ $user->status }}', '{{ $user->employee_id }}' )" title="Edit">
                                         <i data-lucide="pencil"></i>
                                     </button>
                                     @if($user->id !== auth()->id())
@@ -99,6 +103,10 @@
     <form method="POST" action="{{ route('admin.users.store') }}">
         @csrf
         <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Employee ID</label>
+                <input type="text" class="form-control" name="employee_id" required placeholder="Enter Employee ID">
+            </div>
             <div class="form-group">
                 <label class="form-label">Full Name</label>
                 <input type="text" class="form-control" name="name" required placeholder="Enter full name">
@@ -148,6 +156,10 @@
         @method('PUT')
         <div class="modal-body">
             <div class="form-group">
+                <label class="form-label">Employee ID</label>
+                <input type="text" class="form-control" name="employee_id" id="edit-employee-id" required>
+            </div>
+            <div class="form-group">
                 <label class="form-label">Full Name</label>
                 <input type="text" class="form-control" name="name" id="edit-name" required>
             </div>
@@ -193,6 +205,21 @@
                         <option value="admin">Admin</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <div style="display:flex; gap:15px;">
+                        <label>
+                            <input type="radio" name="status" value="active"
+                                {{  $user->status == 'active' ? 'checked' : '' }}>
+                            Active
+                        </label>
+                        <label>
+                            <input type="radio" name="status" value="inactive"
+                                {{ $user->status == 'inactive' ? 'checked' : '' }}>
+                            Inactive
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="modal-footer">
@@ -205,15 +232,19 @@
 
 @push('scripts')
 <script>
-function openEditUser(id, name, email, department, role) {
+function openEditUser(id, name, email, department, role, status, employee_id) {
     document.getElementById('edit-user-form').action = '/admin/users/' + id;
     document.getElementById('edit-name').value = name;
     document.getElementById('edit-email').value = email;
     document.getElementById('edit-department').value = department;
     document.getElementById('edit-role').value = role;
+    document.getElementById('edit-employee-id').value = employee_id;
     // Reset radio to No
     document.querySelector('input[name="reset_password"][value="no"]').checked = true;
     toggleResetPw(false);
+    document.querySelectorAll('input[name="status"]').forEach(radio => {
+        radio.checked = radio.value === status;
+    });
     openModal('edit-user-modal');
     lucide.createIcons();
 }

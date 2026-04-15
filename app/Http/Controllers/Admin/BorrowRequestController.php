@@ -40,7 +40,10 @@ class BorrowRequestController extends Controller
         $activeCount = Borrowing::whereIn('status', ['active', 'overdue'])->count();
 
         $assets = Asset::where('available_stock', '>', 0)->orderBy('asset_name')->get();
-        $users = User::where('role', 'user')->orderBy('name')->get();
+        $users = User::where('role', 'user')
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.borrow-requests.index', compact(
             'borrowings', 'pendingCount', 'approvedCount', 'activeCount', 'assets', 'users'
