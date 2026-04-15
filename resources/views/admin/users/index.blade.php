@@ -23,6 +23,10 @@
                         <option value="user" {{ request('role') === 'user' ? 'selected' : '' }}>User</option>
                     </select>
                 </form>
+                <button class="btn btn-outline" onclick="openModal('import-user-modal')">
+                    <i data-lucide="upload"></i>
+                    Import Excel
+                </button>
                 <button class="btn btn-primary" onclick="openModal('add-user-modal')">
                     <i data-lucide="plus"></i>
                     Add User
@@ -76,7 +80,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6">
+                        <tr><td colspan="7">
                             <div class="empty-state">
                                 <i data-lucide="users"></i>
                                 <p class="empty-title">No users found</p>
@@ -95,6 +99,37 @@
 @endsection
 
 @push('modals')
+<div class="modal" id="import-user-modal" style="display:none;">
+    <div class="modal-header">
+        <h3 class="modal-title">Import Users from Excel</h3>
+        <button class="modal-close" onclick="closeAllModals()"><i data-lucide="x"></i></button>
+    </div>
+    <form method="POST" action="{{ route('admin.users.import') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="modal-body">
+            <div style="padding:14px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:18px;">
+                <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;">Excel format (header row):</p>
+                <p style="font-size:11px;color:var(--text-muted);line-height:1.6;">
+                    <code>employee_id</code>, <code>name</code>, <code>email</code>, <code>department</code>, <code>role</code>, <code>status</code><br>
+                    <span style="color:var(--text-muted);">Extra columns (e.g. position) will be ignored automatically.</span><br>
+                    <span style="color:var(--text-muted);">Default password: <strong>password123</strong></span>
+                </p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Choose Excel File</label>
+                <input type="file" class="form-control" name="file" accept=".xlsx,.xls,.csv" required style="padding:10px;">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="upload"></i>
+                Import
+            </button>
+        </div>
+    </form>
+</div>
+
 <div class="modal" id="add-user-modal" style="display:none;">
     <div class="modal-header">
         <h3 class="modal-title">Add New User</h3>

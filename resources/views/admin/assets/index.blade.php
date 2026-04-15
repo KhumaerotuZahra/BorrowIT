@@ -16,6 +16,10 @@
                     <i data-lucide="search"></i>
                     <input type="text" name="search" placeholder="Search assets..." value="{{ request('search') }}">
                 </form>
+                <button class="btn btn-outline" onclick="openModal('import-asset-modal')">
+                    <i data-lucide="upload"></i>
+                    Import Excel
+                </button>
                 <button class="btn btn-primary" onclick="openModal('add-asset-modal')">
                     <i data-lucide="plus"></i>
                     Add Asset
@@ -82,6 +86,36 @@
 @endsection
 
 @push('modals')
+<div class="modal" id="import-asset-modal" style="display:none;">
+    <div class="modal-header">
+        <h3 class="modal-title">Import Assets from Excel</h3>
+        <button class="modal-close" onclick="closeAllModals()"><i data-lucide="x"></i></button>
+    </div>
+    <form method="POST" action="{{ route('admin.assets.import') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="modal-body">
+            <div style="padding:14px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:18px;">
+                <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;">Excel format (header row):</p>
+                <p style="font-size:11px;color:var(--text-muted);line-height:1.6;">
+                    <code>asset_number</code>, <code>asset_name</code>, <code>available_stock</code><br>
+                    <span style="color:var(--text-muted);">Asset ID will be auto-generated. Extra columns will be ignored.</span>
+                </p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Choose Excel File</label>
+                <input type="file" class="form-control" name="file" accept=".xlsx,.xls,.csv" required style="padding:10px;">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="upload"></i>
+                Import
+            </button>
+        </div>
+    </form>
+</div>
+
 <div class="modal" id="add-asset-modal" style="display:none;">
     <div class="modal-header">
         <h3 class="modal-title">Add New Asset</h3>

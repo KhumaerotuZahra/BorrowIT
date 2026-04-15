@@ -49,11 +49,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::post('/users/import', [UserController::class, 'importExcel'])->name('users.import');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('/assets', [AssetController::class, 'index'])->name('assets.index');
         Route::post('/assets', [AssetController::class, 'store'])->name('assets.store');
         Route::put('/assets/{asset}', [AssetController::class, 'update'])->name('assets.update');
+        Route::post('/assets/import', [AssetController::class, 'importExcel'])->name('assets.import');
         Route::delete('/assets/{asset}', [AssetController::class, 'destroy'])->name('assets.destroy');
 
         Route::get('/borrow-requests', [BorrowRequestController::class, 'index'])->name('borrow-requests.index');

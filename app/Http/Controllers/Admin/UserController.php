@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Notification;
+use App\Imports\UsersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -96,6 +98,27 @@ class UserController extends Controller
         );
 
         return back()->with('success', "Password reset for {$user->name}. New password: {$newPassword}");
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        try {
+            $import = new UsersImport();
+            Excel::import($import, $request->file('file'));
+
+            $msg = "Import complete! {$import->getImported()} users imported.";
+            if ($import->getSkipped() > 0) {
+                $msg .= " {$import->getSkipped()} rows skipped (duplicate email or missing data).";
+            }
+
+            return back()->with('success', $msg);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Import failed: ' . $e->getMessage());
+        }
     }
 
     public function destroy(User $user)
