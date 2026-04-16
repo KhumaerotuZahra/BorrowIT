@@ -43,7 +43,7 @@
                         <tr>
                             <td>{{ $assets->firstItem() + $index }}</td>
                             <td><span class="font-mono" style="color:var(--accent);font-weight:600;">{{ $asset->asset_id }}</span></td>
-                            <td><span class="font-mono">{{ $asset->asset_number }}</span></td>
+                            <td style="font-weight:500;">{{ $asset->asset_number }}</td>
                             <td style="font-weight:500;">{{ $asset->asset_name }}</td>
                             <td>
                                 <span class="badge {{ $asset->available_stock > 0 ? 'badge-active' : 'badge-overdue' }}">

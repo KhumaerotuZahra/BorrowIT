@@ -163,8 +163,7 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Quantity</label>
-                 <input type="number" class="form-control" value="1" readonly>
-                <input type="hidden" name="quantity" value="1">
+                 <input type="number" class="form-control" name="quantity" value="1" min="1">
                 <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;" id="admin-stock-info"></small>
             </div>
             <div class="form-row">
