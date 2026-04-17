@@ -15,7 +15,7 @@
                 <form method="GET" action="{{ route('user.borrowings.index') }}" style="display:flex;gap:10px;align-items:center;">
                     <div class="search-box">
                         <i data-lucide="search"></i>
-                        <input type="text" name="search" placeholder="Search by asset..." value="{{ request('search') }}">
+                        <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}">
                     </div>
                     <select name="status" class="form-control" style="width:auto;padding:8px 36px 8px 14px;font-size:13px;height:40px;" onchange="this.form.submit()">
                         <option value="">All Status</option>
@@ -38,7 +38,8 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Asset Name</th>
+                        <th>Asset Group</th>
+                        <th>Qty</th>
                         <th>Borrow Date</th>
                         <th>Due Date</th>
                         <th>Status</th>
@@ -48,7 +49,8 @@
                     @forelse($borrowings as $index => $borrow)
                         <tr>
                             <td>{{ $borrowings->firstItem() + $index }}</td>
-                            <td style="font-weight:500;">{{ $borrow->asset->asset_name }}</td>
+                            <td style="font-weight:500;">{{ $borrow->assetGroup->group_name ?? ($borrow->asset->asset_name ?? '-') }}</td>
+                            <td>{{ $borrow->quantity }}</td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">
                                 {{ $borrow->due_date->format('d M Y') }}
@@ -65,7 +67,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5">
+                        <tr><td colspan="6">
                             <div class="empty-state">
                                 <i data-lucide="book-open"></i>
                                 <p class="empty-title">No borrowings yet</p>
@@ -94,20 +96,17 @@
         @csrf
         <div class="modal-body">
             <div class="form-group">
-                <label class="form-label">Select Asset</label>
-                <select class="form-control" name="asset_id" id="asset-select" required onchange="updateStock()">
-                    <option value="">Choose an asset to borrow</option>
-                    @foreach($assets as $asset)
-                        <option value="{{ $asset->id }}" data-stock="{{ $asset->available_stock }}">
-                            {{ $asset->asset_name }} - {{ $asset->asset_number }} 
-                        </option>
+                <label class="form-label">Select Asset Group</label>
+                <select class="form-control" name="asset_group_id" required>
+                    <option value="">Choose asset group...</option>
+                    @foreach($assetGroups as $group)
+                        <option value="{{ $group->id }}">{{ $group->group_name }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Quantity</label>
-                <input type="number" class="form-control" name="quantity" value="1" min="1">
-                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;" id="admin-stock-info"></small>
+                <input type="number" class="form-control" name="quantity" value="1" min="1" required>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -119,10 +118,6 @@
                     <input type="date" class="form-control" name="due_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}">
                 </div>
             </div>
-            <!-- <div class="form-group">
-                <label class="form-label">Purpose (Optional)</label>
-                <textarea class="form-control" name="purpose" placeholder="Why do you need this asset?" rows="3" maxlength="500"></textarea>
-            </div> -->
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
@@ -133,23 +128,4 @@
         </div>
     </form>
 </div>
-@endpush
-
-@push('scripts')
-<script>
-function updateStock() {
-    const sel = document.getElementById('asset-select');
-    const info = document.getElementById('stock-info');
-    const qtyInput = document.getElementById('quantity-input');
-    const opt = sel.options[sel.selectedIndex];
-    if (opt.value) {
-        const stock = parseInt(opt.dataset.stock);
-        info.textContent = 'Available stock: ' + stock;
-        qtyInput.max = stock;
-    } else {
-        info.textContent = '';
-        qtyInput.removeAttribute('max');
-    }
-}
-</script>
 @endpush

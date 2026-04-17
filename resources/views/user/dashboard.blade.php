@@ -51,7 +51,7 @@
                     <tbody>
                         @forelse($myBorrowedAssets as $borrow)
                             <tr>
-                                <td style="font-weight:500;">{{ $borrow->asset->asset_name }}</td>
+                                <td style="font-weight:500;">{{ $borrow->asset->asset_name ?? ($borrow->assetGroup->group_name ?? '-') }}</td>
                                 <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                                 <td style="font-size:12px;">
                                     {{ $borrow->due_date->format('d M Y') }}

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\Asset;
+use App\Models\AssetGroup;
 use App\Models\Borrowing;
 use App\Models\Notification;
 use App\Models\User;
@@ -15,12 +15,16 @@ class BorrowingController extends Controller
     {
         Borrowing::checkAndUpdateOverdue();
 
-        $query = Borrowing::with('asset')
-            ->where('user_id', auth()->id());
+        $query = Borrowing::with(['asset', 'assetGroup'])
+            ->where('user_id', auth()->id())
+            ->whereNull('parent_borrowing_id');
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('asset', fn($q) => $q->where('asset_name', 'like', "%{$search}%"));
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('assetGroup', fn($q2) => $q2->where('group_name', 'like', "%{$search}%"))
+                  ->orWhereHas('asset', fn($q2) => $q2->where('asset_name', 'like', "%{$search}%"));
+            });
         }
 
         if ($request->filled('status')) {
@@ -28,38 +32,35 @@ class BorrowingController extends Controller
         }
 
         $borrowings = $query->orderBy('created_at', 'desc')->paginate(10);
-        $assets = Asset::where('available_stock', '>', 0)->get();
+        $assetGroups = AssetGroup::orderBy('group_name')->get();
 
-        return view('user.borrowings.index', compact('borrowings', 'assets'));
+        return view('user.borrowings.index', compact('borrowings', 'assetGroups'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'asset_id' => 'required|exists:assets,id',
+            'asset_group_id' => 'required|exists:asset_groups,id',
             'quantity' => 'required|integer|min:1',
             'borrow_date' => 'required|date|after_or_equal:today',
             'due_date' => 'required|date|after:borrow_date',
-            'purpose' => 'nullable|string|max:500',
         ]);
 
-        $asset = Asset::findOrFail($request->asset_id);
+        $group = AssetGroup::findOrFail($request->asset_group_id);
+        $availableStock = $group->totalAvailableStock();
 
-        if ($asset->available_stock < $request->quantity) {
-            return back()->with('error', 'Not enough stock available!')->withInput();
+        if ($availableStock < $request->quantity) {
+            return back()->with('error', "Not enough stock in '{$group->group_name}'! Available: {$availableStock}")->withInput();
         }
 
         $borrowing = Borrowing::create([
             'user_id' => auth()->id(),
-            'asset_id' => $request->asset_id,
+            'asset_group_id' => $request->asset_group_id,
             'quantity' => $request->quantity,
             'borrow_date' => $request->borrow_date,
             'due_date' => $request->due_date,
             'status' => 'pending',
-            'purpose' => $request->purpose,
         ]);
-
-        $asset->decrement('available_stock', $request->quantity);
 
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
@@ -67,7 +68,7 @@ class BorrowingController extends Controller
                 $admin->id,
                 'new_request',
                 'New Borrow Request',
-                auth()->user()->name . " has requested to borrow {$asset->asset_name} (Qty: {$request->quantity}).",
+                auth()->user()->name . " has requested to borrow {$group->group_name} (Qty: {$request->quantity}).",
                 ['borrowing_id' => $borrowing->id]
             );
         }

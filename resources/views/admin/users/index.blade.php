@@ -23,6 +23,10 @@
                         <option value="user" {{ request('role') === 'user' ? 'selected' : '' }}>User</option>
                     </select>
                 </form>
+                <a href="{{ route('admin.users.export-template') }}" class="btn btn-outline">
+                    <i data-lucide="download"></i>
+                    Export Template
+                </a>
                 <button class="btn btn-outline" onclick="openModal('import-user-modal')">
                     <i data-lucide="upload"></i>
                     Import Excel

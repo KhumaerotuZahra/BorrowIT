@@ -81,7 +81,7 @@
                                         <span>{{ $request->user->name }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $request->asset->asset_name }}</td>
+                                <td>{{ $request->assetGroup->group_name ?? ($request->asset->asset_name ?? '-') }}</td>
                                 <td style="font-size:12px;">{{ $request->borrow_date->format('d M Y') }}</td>
                                 <td style="font-size:12px;">
                                     @php
@@ -132,7 +132,7 @@
                                         <span>{{ $borrow->user->name }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $borrow->asset->asset_name }}</td>
+                                <td>{{ $borrow->asset->asset_name ?? ($borrow->assetGroup->group_name ?? '-') }}</td>
                                 <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                                 <td style="font-size:12px;">{{ $borrow->due_date->format('d M Y') }}</td>
                                 <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>

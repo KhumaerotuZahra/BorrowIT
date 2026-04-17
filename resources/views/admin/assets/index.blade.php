@@ -16,6 +16,10 @@
                     <i data-lucide="search"></i>
                     <input type="text" name="search" placeholder="Search assets..." value="{{ request('search') }}">
                 </form>
+                <a href="{{ route('admin.assets.export-template') }}" class="btn btn-outline">
+                    <i data-lucide="download"></i>
+                    Export Template
+                </a>
                 <button class="btn btn-outline" onclick="openModal('import-asset-modal')">
                     <i data-lucide="upload"></i>
                     Import Excel
@@ -32,6 +36,7 @@
                     <tr>
                         <th>No</th>
                         <th>Asset ID</th>
+                        <th>Group Name</th>
                         <th>Asset Number</th>
                         <th>Asset Name</th>
                         <th>Available</th>
@@ -43,7 +48,8 @@
                         <tr>
                             <td>{{ $assets->firstItem() + $index }}</td>
                             <td><span class="font-mono" style="color:var(--accent);font-weight:600;">{{ $asset->asset_id }}</span></td>
-                            <td style="font-weight:500;">{{ $asset->asset_number }}</td>
+                            <td>{{ $asset->assetGroup->group_name ?? '-' }}</td>
+                            <td><span class="font-mono">{{ $asset->asset_number }}</span></td>
                             <td style="font-weight:500;">{{ $asset->asset_name }}</td>
                             <td>
                                 <span class="badge {{ $asset->available_stock > 0 ? 'badge-active' : 'badge-overdue' }}">
@@ -52,10 +58,10 @@
                             </td>
                             <td>
                                 <div class="action-btns">
-                                    <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditAsset({{ $asset->id }}, '{{ addslashes($asset->asset_number) }}', '{{ addslashes($asset->asset_name) }}', {{ $asset->available_stock }})" title="Edit">
+                                    <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditAsset({{ $asset->id }}, '{{ $asset->asset_group_id }}', '{{ addslashes($asset->asset_number) }}', '{{ addslashes($asset->asset_name) }}', {{ $asset->available_stock }})" title="Edit">
                                         <i data-lucide="pencil"></i>
                                     </button>
-                                    <form method="POST" action="{{ route('admin.assets.destroy', $asset) }}" onsubmit="return confirm('Are you sure you want to delete this asset?')">
+                                    <form method="POST" action="{{ route('admin.assets.destroy', $asset) }}" onsubmit="return confirm('Delete this asset?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-ghost btn-sm btn-icon" style="color:var(--danger);" title="Delete">
@@ -66,7 +72,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6">
+                        <tr><td colspan="7">
                             <div class="empty-state">
                                 <i data-lucide="package"></i>
                                 <p class="empty-title">No assets found</p>
@@ -97,8 +103,8 @@
             <div style="padding:14px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:18px;">
                 <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600;">Excel format (header row):</p>
                 <p style="font-size:11px;color:var(--text-muted);line-height:1.6;">
-                    <code>asset_number</code>, <code>asset_name</code>, <code>available_stock</code><br>
-                    <span style="color:var(--text-muted);">Asset ID will be auto-generated. Extra columns will be ignored.</span>
+                    <code>group_code</code>, <code>asset_number</code>, <code>asset_name</code>, <code>available_stock</code><br>
+                    <span>Asset ID auto-generated. Extra columns ignored.</span>
                 </p>
             </div>
             <div class="form-group">
@@ -127,6 +133,15 @@
             <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;padding:10px 14px;background:var(--surface-2);border-radius:var(--radius-sm);">
                 <strong>Asset ID</strong> will be auto-generated in format: BPI-YY-NNNN
             </p>
+            <div class="form-group">
+                <label class="form-label">Group Name</label>
+                <select class="form-control" name="asset_group_id" required>
+                    <option value="">Select Group</option>
+                    @foreach($assetGroups as $group)
+                        <option value="{{ $group->id }}">{{ $group->group_name }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="form-group">
                 <label class="form-label">Asset Number</label>
                 <input type="text" class="form-control" name="asset_number" required placeholder="e.g. LAP-001" maxlength="30">
@@ -157,6 +172,15 @@
         @method('PUT')
         <div class="modal-body">
             <div class="form-group">
+                <label class="form-label">Group Name</label>
+                <select class="form-control" name="asset_group_id" id="edit-asset-group" required>
+                    <option value="">Select Group</option>
+                    @foreach($assetGroups as $group)
+                        <option value="{{ $group->id }}">{{ $group->group_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
                 <label class="form-label">Asset Number</label>
                 <input type="text" class="form-control" name="asset_number" id="edit-asset-number" required maxlength="30">
             </div>
@@ -179,8 +203,9 @@
 
 @push('scripts')
 <script>
-function openEditAsset(id, number, name, stock) {
+function openEditAsset(id, groupId, number, name, stock) {
     document.getElementById('edit-asset-form').action = '/admin/assets/' + id;
+    document.getElementById('edit-asset-group').value = groupId || '';
     document.getElementById('edit-asset-number').value = number;
     document.getElementById('edit-asset-name').value = name;
     document.getElementById('edit-asset-stock').value = stock;

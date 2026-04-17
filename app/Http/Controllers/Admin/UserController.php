@@ -121,6 +121,25 @@ class UserController extends Controller
         }
     }
 
+    public function exportTemplate()
+    {
+        $filename = 'template_import_users.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['employee_id', 'name', 'email', 'department', 'role', 'status']);
+            fputcsv($file, ['EMP001', 'Budi Santoso', 'budi@ptbpi.co.id', 'IT', 'user', 'active']);
+            fputcsv($file, ['EMP002', 'Siti Rahayu', 'siti@ptbpi.co.id', 'HR', 'admin', 'active']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function destroy(User $user)
     {
         if ($user->id === auth()->id()) {

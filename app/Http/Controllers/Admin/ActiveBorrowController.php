@@ -15,7 +15,9 @@ class ActiveBorrowController extends Controller
     {
         Borrowing::checkAndUpdateOverdue();
 
-        $query = Borrowing::with(['user', 'asset']);
+        // Show only child borrowings (individual assets) that are active/overdue/returned
+        $query = Borrowing::with(['user', 'asset', 'assetGroup'])
+            ->whereNotNull('parent_borrowing_id');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -25,67 +27,29 @@ class ActiveBorrowController extends Controller
             });
         }
 
-        if ($request->filled('status')){
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
-        }else{
+        } else {
             $query->whereIn('status', ['active', 'overdue', 'returned']);
         }
+
         $borrowings = $query
             ->orderByRaw("FIELD(status, 'overdue', 'active', 'returned')")
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $itEmployees = User::where('department', 'IT')->orderBy('name')->get();
+        $admins = User::where('role', 'admin')
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.active-borrows.index', compact('borrowings', 'itEmployees'));
-    }
-
-    public function update(Request $request, Borrowing $borrowing)
-    {
-        $request->validate([
-            'handover_by' => 'nullable|string',
-            'status' => 'nullable|in:active,overdue,returned',
-            'return_pic' => 'nullable|string',
-        ]);
-
-        $data = [];
-
-        if ($request->filled('handover_by')) {
-            $data['handover_by'] = $request->handover_by;
-        }
-
-        if ($request->filled('return_pic')) {
-            $data['return_pic'] = $request->return_pic;
-        }
-
-        if ($request->filled('status') && $request->status !== $borrowing->status) {
-            $data['status'] = $request->status;
-
-            if ($request->status === 'returned' && !$borrowing->return_date) {
-                $data['return_date'] = Carbon::now();
-                $borrowing->asset->increment('available_stock', $borrowing->quantity);
-
-                Notification::send(
-                    $borrowing->user_id,
-                    'borrow_returned',
-                    'Asset Returned',
-                    "The asset {$borrowing->asset->asset_name} has been marked as returned. Thank you!",
-                    ['borrowing_id' => $borrowing->id]
-                );
-            }
-        }
-
-        if (!empty($data)) {
-            $borrowing->update($data);
-        }
-
-        return back()->with('success', 'Borrowing updated successfully!');
+        return view('admin.active-borrows.index', compact('borrowings', 'admins'));
     }
 
     public function markReturned(Request $request, Borrowing $borrowing)
     {
         $request->validate([
-            'return_pic' => 'nullable|string',
+            'return_pic' => 'required|string',
             'return_notes' => 'nullable|string',
         ]);
 
@@ -96,13 +60,29 @@ class ActiveBorrowController extends Controller
             'return_notes' => $request->return_notes,
         ]);
 
-        $borrowing->asset->increment('available_stock', $borrowing->quantity);
+        if ($borrowing->asset) {
+            $borrowing->asset->increment('available_stock', 1);
+        }
 
+        // Check if all child borrowings for parent are returned
+        if ($borrowing->parent_borrowing_id) {
+            $parent = $borrowing->parentBorrowing;
+            $allReturned = $parent->childBorrowings()->where('status', '!=', 'returned')->count() === 0;
+            if ($allReturned) {
+                $parent->update([
+                    'status' => 'returned',
+                    'return_date' => Carbon::now(),
+                    'return_pic' => $request->return_pic,
+                ]);
+            }
+        }
+
+        $assetName = $borrowing->asset->asset_name ?? 'Asset';
         Notification::send(
             $borrowing->user_id,
             'borrow_returned',
             'Asset Returned',
-            "The asset {$borrowing->asset->asset_name} has been marked as returned. Thank you!",
+            "The asset {$assetName} has been marked as returned. Thank you!",
             ['borrowing_id' => $borrowing->id]
         );
 

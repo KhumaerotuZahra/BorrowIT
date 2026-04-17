@@ -13,6 +13,7 @@ class Borrowing extends Model
     protected $fillable = [
         'user_id',
         'asset_id',
+        'asset_group_id',
         'quantity',
         'borrow_date',
         'due_date',
@@ -26,6 +27,7 @@ class Borrowing extends Model
         'return_pic',
         'return_notes',
         'purpose',
+        'parent_borrowing_id',
     ];
 
     protected $casts = [
@@ -46,9 +48,24 @@ class Borrowing extends Model
         return $this->belongsTo(Asset::class);
     }
 
+    public function assetGroup()
+    {
+        return $this->belongsTo(AssetGroup::class);
+    }
+
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function parentBorrowing()
+    {
+        return $this->belongsTo(Borrowing::class, 'parent_borrowing_id');
+    }
+
+    public function childBorrowings()
+    {
+        return $this->hasMany(Borrowing::class, 'parent_borrowing_id');
     }
 
     public function isOverdue(): bool

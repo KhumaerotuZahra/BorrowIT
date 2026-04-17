@@ -27,7 +27,7 @@ class UserDashboardController extends Controller
             ->where('status', 'pending')
             ->count();
 
-        $myBorrowedAssets = Borrowing::with('asset')
+        $myBorrowedAssets = Borrowing::with(['asset', 'assetGroup'])
             ->where('user_id', $userId)
             ->whereIn('status', ['active', 'overdue', 'approved'])
             ->orderBy('created_at', 'desc')

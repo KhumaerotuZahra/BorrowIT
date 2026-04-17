@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AssetGroupController;
 use App\Http\Controllers\Admin\AssetController;
 use App\Http\Controllers\Admin\BorrowRequestController;
 use App\Http\Controllers\Admin\ActiveBorrowController;
@@ -45,29 +46,42 @@ Route::middleware('auth')->group(function () {
         Route::get('/monthly-borrowing/export-most-borrowed', [DashboardController::class, 'exportMostBorrowed'])->name('monthly-borrowing.export-most-borrowed');
         Route::get('/monthly-borrowing/export-returned', [DashboardController::class, 'exportReturnedItems'])->name('monthly-borrowing.export-returned');
 
+        // Users
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
         Route::post('/users/import', [UserController::class, 'importExcel'])->name('users.import');
+        Route::get('/users/export-template', [UserController::class, 'exportTemplate'])->name('users.export-template');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
+        // Asset Groups
+        Route::get('/asset-groups', [AssetGroupController::class, 'index'])->name('asset-groups.index');
+        Route::post('/asset-groups', [AssetGroupController::class, 'store'])->name('asset-groups.store');
+        Route::put('/asset-groups/{assetGroup}', [AssetGroupController::class, 'update'])->name('asset-groups.update');
+        Route::delete('/asset-groups/{assetGroup}', [AssetGroupController::class, 'destroy'])->name('asset-groups.destroy');
+
+        // Assets
         Route::get('/assets', [AssetController::class, 'index'])->name('assets.index');
         Route::post('/assets', [AssetController::class, 'store'])->name('assets.store');
         Route::put('/assets/{asset}', [AssetController::class, 'update'])->name('assets.update');
         Route::post('/assets/import', [AssetController::class, 'importExcel'])->name('assets.import');
+        Route::get('/assets/export-template', [AssetController::class, 'exportTemplate'])->name('assets.export-template');
         Route::delete('/assets/{asset}', [AssetController::class, 'destroy'])->name('assets.destroy');
 
+        // Borrow Requests
         Route::get('/borrow-requests', [BorrowRequestController::class, 'index'])->name('borrow-requests.index');
         Route::post('/borrow-requests', [BorrowRequestController::class, 'adminStore'])->name('borrow-requests.store');
         Route::post('/borrow-requests/{borrowing}/approve', [BorrowRequestController::class, 'approve'])->name('borrow-requests.approve');
         Route::post('/borrow-requests/{borrowing}/reject', [BorrowRequestController::class, 'reject'])->name('borrow-requests.reject');
         Route::post('/borrow-requests/{borrowing}/handover', [BorrowRequestController::class, 'handover'])->name('borrow-requests.handover');
+        Route::get('/borrow-requests/group-assets/{assetGroup}', [BorrowRequestController::class, 'getGroupAssets'])->name('borrow-requests.group-assets');
 
+        // Active Borrows
         Route::get('/active-borrows', [ActiveBorrowController::class, 'index'])->name('active-borrows.index');
-        Route::put('/active-borrows/{borrowing}', [ActiveBorrowController::class, 'update'])->name('active-borrows.update');
         Route::post('/active-borrows/{borrowing}/return', [ActiveBorrowController::class, 'markReturned'])->name('active-borrows.return');
 
+        // Notifications
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');

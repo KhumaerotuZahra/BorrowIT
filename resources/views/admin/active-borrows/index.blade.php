@@ -16,16 +16,7 @@
                     <i data-lucide="search"></i>
                     <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}">
                 </form>
-                <form method="GET" action="{{ route('admin.active-borrows.index') }}">
-                    <select name="status" class="form-control" onchange="this.form.submit()" style="width:auto;">
-                        <option value="">All</option>
-                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
-                        <option value="overdue" {{ request('status') === 'overdue' ? 'selected' : '' }}>Overdue</option>
-                    </select>
-                </form>
             </div>
-
         </div>
         <div class="table-responsive">
             <table class="data-table">
@@ -56,8 +47,8 @@
                                 </div>
                             </td>
                             <td>
-                                <div style="font-weight:500;">{{ $borrow->asset->asset_name }}</div>
-                                <div class="font-mono" style="font-size:11px;color:var(--text-muted);">{{ $borrow->asset->asset_number }}</div>
+                                <div style="font-weight:500;">{{ $borrow->asset->asset_name ?? '-' }}</div>
+                                <div class="font-mono" style="font-size:11px;color:var(--text-muted);">{{ $borrow->asset->asset_number ?? '' }}</div>
                             </td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">
@@ -73,11 +64,11 @@
                             <td style="font-size:12px;">{{ $borrow->return_pic ?? '-' }}</td>
                             <td>
                                 @if(in_array($borrow->status, ['active', 'overdue']))
-                                    <button class="btn btn-primary btn-sm" onclick="openReturnModal({{ $borrow->id }}, '{{ addslashes($borrow->asset->asset_name) }}', '{{ $borrow->user->name }}')">
+                                    <button class="btn btn-primary btn-sm" onclick="openReturnModal({{ $borrow->id }}, '{{ addslashes($borrow->asset->asset_name ?? '') }}', '{{ $borrow->user->name }}')">
                                         <i data-lucide="undo-2"></i>
                                         Return
                                     </button>
-                                @elseif($borrow->status === 'returned')
+                                @else
                                     <span style="font-size:12px;color:var(--text-muted);">-</span>
                                 @endif
                             </td>
@@ -87,7 +78,7 @@
                             <div class="empty-state">
                                 <i data-lucide="inbox"></i>
                                 <p class="empty-title">No active borrows</p>
-                                <p class="empty-desc">Active borrows will appear here.</p>
+                                <p class="empty-desc">Active borrows will appear here after handover.</p>
                             </div>
                         </td></tr>
                     @endforelse
@@ -116,7 +107,12 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Return PIC</label>
-                <input type="text" class="form-control" name="return_pic" value="{{ auth()->user()->name }}" required placeholder="Person receiving the return">
+                <select class="form-control" name="return_pic" required>
+                    <option value="">Select PIC...</option>
+                    @foreach($admins as $admin)
+                        <option value="{{ $admin->name }}" {{ $admin->id === auth()->id() ? 'selected' : '' }}>{{ $admin->name }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Notes (Optional)</label>

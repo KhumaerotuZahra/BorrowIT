@@ -1,0 +1,6 @@
+employee_id,name,email,department,position,role,status
+EMP001,Budi Santoso,budi@ptbpi.co.id,IT,Staff IT,user,active
+EMP002,Siti Rahayu,siti@ptbpi.co.id,HR,HRD Manager,admin,active
+EMP003,Ahmad Wijaya,ahmad@ptbpi.co.id,Finance,Accounting,user,active
+EMP004,Dewi Lestari,dewi@ptbpi.co.id,Marketing,Marketing Staff,user,active
+EMP005,Rizki Pratama,rizki@ptbpi.co.id,Engineering,Engineer,user,active

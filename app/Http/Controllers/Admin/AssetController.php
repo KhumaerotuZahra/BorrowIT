@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
+use App\Models\AssetGroup;
 use App\Imports\AssetsImport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -12,7 +13,7 @@ class AssetController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Asset::query();
+        $query = Asset::with('assetGroup');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -24,13 +25,15 @@ class AssetController extends Controller
         }
 
         $assets = $query->orderBy('created_at', 'asc')->paginate(10);
+        $assetGroups = AssetGroup::orderBy('group_name')->get();
 
-        return view('admin.assets.index', compact('assets'));
+        return view('admin.assets.index', compact('assets', 'assetGroups'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'asset_group_id' => 'required|exists:asset_groups,id',
             'asset_number' => 'required|string|max:30',
             'asset_name' => 'required|string|max:255',
             'available_stock' => 'required|integer|min:0',
@@ -40,6 +43,7 @@ class AssetController extends Controller
 
         Asset::create([
             'asset_id' => $assetId,
+            'asset_group_id' => $request->asset_group_id,
             'asset_number' => $request->asset_number,
             'asset_name' => $request->asset_name,
             'total_stock' => $request->available_stock,
@@ -52,12 +56,14 @@ class AssetController extends Controller
     public function update(Request $request, Asset $asset)
     {
         $request->validate([
+            'asset_group_id' => 'required|exists:asset_groups,id',
             'asset_number' => 'required|string|max:30',
             'asset_name' => 'required|string|max:255',
             'available_stock' => 'required|integer|min:0',
         ]);
 
         $asset->update([
+            'asset_group_id' => $request->asset_group_id,
             'asset_number' => $request->asset_number,
             'asset_name' => $request->asset_name,
             'total_stock' => $request->available_stock,
@@ -86,6 +92,25 @@ class AssetController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Import failed: ' . $e->getMessage());
         }
+    }
+
+    public function exportTemplate()
+    {
+        $filename = 'template_import_assets.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['group_code', 'asset_number', 'asset_name', 'available_stock']);
+            fputcsv($file, ['LPT', 'LAP-001', 'Laptop Dell XPS 15', 5]);
+            fputcsv($file, ['MSE', 'MSE-001', 'Mouse Logitech M590', 10]);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function destroy(Asset $asset)

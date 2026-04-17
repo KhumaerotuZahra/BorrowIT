@@ -21,14 +21,16 @@ class DashboardController extends Controller
         $pendingRequests = Borrowing::where('status', 'pending')->count();
         $activeBorrows = Borrowing::whereIn('status', ['active', 'overdue'])->count();
 
-        $recentRequests = Borrowing::with(['user', 'asset'])
+        $recentRequests = Borrowing::with(['user', 'asset', 'assetGroup'])
             ->where('status', 'pending')
+            ->whereNull('parent_borrowing_id')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
-        $activeBorrowings = Borrowing::with(['user', 'asset'])
+        $activeBorrowings = Borrowing::with(['user', 'asset', 'assetGroup'])
             ->whereIn('status', ['active', 'overdue'])
+            ->whereNotNull('parent_borrowing_id')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();

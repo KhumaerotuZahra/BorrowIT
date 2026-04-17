@@ -17,6 +17,10 @@
                 <i data-lucide="users"></i>
                 <span>Manage Users</span>
             </a>
+            <a href="{{ route('admin.asset-groups.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.asset-groups') ? 'active' : '' }}">
+                <i data-lucide="folder"></i>
+                <span>Asset Group</span>
+            </a>
             <a href="{{ route('admin.assets.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.assets') ? 'active' : '' }}">
                 <i data-lucide="package"></i>
                 <span>Asset Management</span>

@@ -11,11 +11,17 @@ class Asset extends Model
 
     protected $fillable = [
         'asset_id',
+        'asset_group_id',
         'asset_number',
         'asset_name',
         'total_stock',
         'available_stock',
     ];
+
+    public function assetGroup()
+    {
+        return $this->belongsTo(AssetGroup::class);
+    }
 
     public static function generateAssetId(): string
     {
