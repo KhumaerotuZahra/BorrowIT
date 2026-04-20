@@ -253,13 +253,14 @@ class DashboardController extends Controller
             $query->whereMonth('borrow_date', $month);
         }
 
-        return $query->groupBy('asset_id')
+        return $query->whereHas('asset')
+            ->groupBy('asset_id')
             ->with('asset')
             ->orderByDesc('borrow_count')
             ->get()
             ->map(function ($item) {
                 return [
-                    'name' => $item->asset->asset_name ?? 'Unknown',
+                    'name' => $item->asset->asset_name,
                     'count' => $item->borrow_count,
                 ];
             });

@@ -62,7 +62,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($mostBorrowed as $index => $item)
+                    @forelse($mostBorrowed->filter(fn($item) => $item->asset) as $index => $item)
                         <tr>
                             <td>
                                 @if($index < 3)
@@ -76,7 +76,7 @@
                                     {{ $index + 1 }}
                                 @endif
                             </td>
-                            <td style="font-weight:500;">{{ $item->asset->asset_name ?? 'Deleted Asset' }}</td>
+                            <td style="font-weight:500;">{{ $item->asset?->asset_name }}</td>
                             <td><span class="badge badge-active">{{ $item->borrow_count }}</span></td>
                         </tr>
                     @empty
@@ -163,10 +163,11 @@
                 <tbody>
                     @forelse($borrowings as $index => $borrow)
                         <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td style="font-weight:500;">{{ $borrow->user->name }}</td>
                             <td>{{ $borrow->user->department ?? '-' }}</td>
-                            <td>{{ $borrow->asset->asset_name ?? ($borrow->assetGroup->group_name ?? '-') }}</td>
+                            <!-- <td>{{ $borrow->asset?->asset_name ?? ($borrow->assetGroup->group_name ?? '-') }}</td> -->
+                            <td>{{ $borrow->asset?->asset_name ?? '-' }}</td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">{{ $borrow->return_date ? $borrow->return_date->format('d M Y') : '-' }}</td>
                             <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
