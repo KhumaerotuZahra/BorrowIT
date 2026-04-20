@@ -18,8 +18,9 @@ class DashboardController extends Controller
 
         $totalAssets = Asset::count();
         $availableStock = Asset::sum('available_stock');
-        $pendingRequests = Borrowing::where('status', 'pending')->count();
-        $activeBorrows = Borrowing::whereIn('status', ['active', 'overdue'])->count();
+        $pendingRequests = Borrowing::where('status', 'pending')->whereNull('parent_borrowing_id')->count();
+        $activeBorrows = Borrowing::where('status', 'active')->whereNotNull('parent_borrowing_id')->count();
+        $overdueCount = Borrowing::where('status', 'overdue')->whereNotNull('parent_borrowing_id')->count();
 
         $recentRequests = Borrowing::with(['user', 'asset', 'assetGroup'])
             ->where('status', 'pending')
@@ -47,6 +48,7 @@ class DashboardController extends Controller
             'availableStock',
             'pendingRequests',
             'activeBorrows',
+            'overdueCount',
             'recentRequests',
             'activeBorrowings',
             'monthlyData',
@@ -69,10 +71,11 @@ class DashboardController extends Controller
             $query->whereYear('borrow_date', $year);
         }
 
-        $borrowings = $query->orderBy('borrow_date', 'desc')->get();
+        $borrowings = $query->whereNotNull('parent_borrowing_id')->orderBy('borrow_date', 'desc')->get();
 
         $mostBorrowedQuery = Borrowing::select('asset_id')
             ->selectRaw('COUNT(*) as borrow_count')
+            ->whereNotNull('asset_id')
             ->whereYear('borrow_date', $year);
         if ($month) {
             $mostBorrowedQuery->whereMonth('borrow_date', $month);

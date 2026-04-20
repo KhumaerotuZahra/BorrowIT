@@ -37,6 +37,13 @@
                 <div class="stat-label">Active Borrows</div>
             </div>
         </a>
+        <a href="{{ route('admin.active-borrows.index', ['status' => 'overdue']) }}" style="text-decoration:none;color:inherit;">
+            <div class="stat-card" style="cursor:pointer;border-left:4px solid #ef4444;">
+                <div class="stat-icon" style="color:#ef4444;"><i data-lucide="alert-triangle"></i></div>
+                <div class="stat-value" style="color:#ef4444;">{{ $overdueCount }}</div>
+                <div class="stat-label">Overdue</div>
+            </div>
+        </a>
     </div>
 
     <div class="chart-card">
