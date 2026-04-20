@@ -118,7 +118,7 @@
                     @forelse($returnedItems as $index => $item)
                         <tr>
                             <td>{{ $index + 1 }}</td>
-                            <td style="font-weight:500;">{{ $item->asset->asset_name }}</td>
+                            <td style="font-weight:500;">{{ $item->asset->asset_name ?? ($item->assetGroup->group_name ?? '-') }}</td>
                             <td>{{ $item->user->name }}</td>
                             <td style="font-size:12px;">{{ $item->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">{{ $item->return_date ? $item->return_date->format('d M Y') : '-' }}</td>
@@ -166,7 +166,7 @@
                             <td>{{ $index + 1 }}</td>
                             <td style="font-weight:500;">{{ $borrow->user->name }}</td>
                             <td>{{ $borrow->user->department ?? '-' }}</td>
-                            <td>{{ $borrow->asset->asset_name }}</td>
+                            <td>{{ $borrow->asset->asset_name ?? ($borrow->assetGroup->group_name ?? '-') }}</td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">{{ $borrow->return_date ? $borrow->return_date->format('d M Y') : '-' }}</td>
                             <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>

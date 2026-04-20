@@ -61,7 +61,7 @@ class DashboardController extends Controller
         $year = $request->get('year', date('Y'));
         $month = $request->get('month', '');
 
-        $query = Borrowing::with(['user', 'user', 'asset']);
+        $query = Borrowing::with(['user', 'asset', 'assetGroup']);
 
         if ($month) {
             $query->whereYear('borrow_date', $year)->whereMonth('borrow_date', $month);
@@ -80,11 +80,11 @@ class DashboardController extends Controller
         $mostBorrowed = $mostBorrowedQuery
             ->groupBy('asset_id')
             ->orderByDesc('borrow_count')
-            ->with('asset')
+            ->with(['asset', 'assetGroup'])
             ->take(10)
             ->get();
 
-        $returnedQuery = Borrowing::with(['user', 'asset'])
+        $returnedQuery = Borrowing::with(['user', 'asset', 'assetGroup'])
             ->where('status', 'returned')
             ->whereYear('return_date', $year);
         if ($month) {
@@ -115,7 +115,7 @@ class DashboardController extends Controller
         $year = $request->get('year', date('Y'));
         $month = $request->get('month', '');
 
-        $query = Borrowing::with(['user', 'asset'])->whereYear('borrow_date', $year);
+        $query = Borrowing::with(['user', 'asset', 'assetGroup'])->whereYear('borrow_date', $year);
         if ($month) {
             $query->whereMonth('borrow_date', $month);
         }
@@ -138,7 +138,7 @@ class DashboardController extends Controller
                     $i + 1,
                     $b->user->name ?? '-',
                     $b->user->department ?? '-',
-                    $b->asset->asset_name ?? '-',
+                    $b->asset->asset_name ?? ($b->assetGroup->group_name ?? '-'),
                     $b->borrow_date ? $b->borrow_date->format('Y-m-d') : '-',
                     $b->return_date ? $b->return_date->format('Y-m-d') : '-',
                     ucfirst($b->status),
@@ -161,7 +161,7 @@ class DashboardController extends Controller
         if ($month) {
             $query->whereMonth('borrow_date', $month);
         }
-        $items = $query->groupBy('asset_id')->orderByDesc('borrow_count')->with('asset')->get();
+        $items = $query->groupBy('asset_id')->orderByDesc('borrow_count')->with(['asset', 'assetGroup'])->get();
 
         $filename = "most_borrowed_{$year}" . ($month ? "_{$month}" : "") . ".csv";
 
@@ -193,7 +193,7 @@ class DashboardController extends Controller
         $year = $request->get('year', date('Y'));
         $month = $request->get('month', '');
 
-        $query = Borrowing::with(['user', 'asset'])
+        $query = Borrowing::with(['user', 'asset', 'assetGroup'])
             ->where('status', 'returned')
             ->whereYear('return_date', $year);
         if ($month) {
@@ -217,7 +217,7 @@ class DashboardController extends Controller
                 fputcsv($file, [
                     $i + 1,
                     $item->user->name ?? '-',
-                    $item->asset->asset_name ?? '-',
+                    $item->asset->asset_name ?? ($item->assetGroup->group_name ?? '-'),
                     $item->return_date ? $item->return_date->format('Y-m-d') : '-',
                     $item->return_pic ?? '-',
                 ]);
