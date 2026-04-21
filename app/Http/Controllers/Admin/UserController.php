@@ -40,12 +40,12 @@ class UserController extends Controller
         $request->validate([
             'employee_id' => 'required|unique:users,employee_id',
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'unique:users,email', 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
+            'email' => ['required', 'email', 'unique:users,email', 'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/'],
             'password' => 'required|string|min:8',
             'department' => 'required|string',
             'role' => 'required|in:admin,user',
         ], [
-            'email.regex' => 'Email must use the @ptbpi.co.id domain.',
+            'email.regex' => 'Email must use the @gmail.com domain.',
         ]);
 
         User::create([
@@ -65,12 +65,12 @@ class UserController extends Controller
         $request->validate([
             'employee_id' => 'required|unique:users,employee_id',
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'unique:users,email,' . $user->id, 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
+            'email' => ['required', 'email', 'unique:users,email,' . $user->id, 'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/'],
             'department' => 'required|string',
             'role' => 'required|in:admin,user',
             'status' => 'required|in:active,inactive',
         ], [
-            'email.regex' => 'Email must use the @ptbpi.co.id domain.',
+            'email.regex' => 'Email must use the @gmail.com domain.',
         ]);
 
         $data = $request->only(['employee_id', 'name', 'email', 'department', 'role', 'status']);
@@ -132,8 +132,8 @@ class UserController extends Controller
         $callback = function () {
             $file = fopen('php://output', 'w');
             fputcsv($file, ['employee_id', 'name', 'email', 'department', 'role', 'status']);
-            fputcsv($file, ['EMP001', 'Budi Santoso', 'budi@ptbpi.co.id', 'IT', 'user', 'active']);
-            fputcsv($file, ['EMP002', 'Siti Rahayu', 'siti@ptbpi.co.id', 'HR', 'admin', 'active']);
+            fputcsv($file, ['EMP001', 'Budi Santoso', 'budi@gmail.com', 'IT', 'user', 'active']);
+            fputcsv($file, ['EMP002', 'Siti Rahayu', 'siti@gmail.com', 'HR', 'admin', 'active']);
             fclose($file);
         };
 

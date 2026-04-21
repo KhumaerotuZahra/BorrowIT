@@ -84,9 +84,9 @@ class AuthController extends Controller
     public function sendResetLink(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
+            'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/'],
         ], [
-            'email.regex' => 'Email must use the @ptbpi.co.id domain.',
+            'email.regex' => 'Email must use the @gmail.com domain.',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -129,11 +129,11 @@ class AuthController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
+            'email' => ['required', 'email', 'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/'],
             'token' => 'required',
             'password' => 'required|string|min:8|confirmed',
         ], [
-            'email.regex' => 'Email must use the @ptbpi.co.id domain.',
+            'email.regex' => 'Email must use the @gmail.com domain.',
         ]);
 
         $record = DB::table('password_reset_tokens')
