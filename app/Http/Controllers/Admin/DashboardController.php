@@ -239,6 +239,7 @@ class DashboardController extends Controller
         for ($i = 1; $i <= 12; $i++) {
             $count = Borrowing::whereYear('borrow_date', $year)
                 ->whereMonth('borrow_date', $i)
+                ->whereNotNull('parent_borrowing_id')
                 ->count();
             $data[] = $count;
         }
@@ -250,6 +251,8 @@ class DashboardController extends Controller
     {
         $query = Borrowing::select('asset_id')
             ->selectRaw('COUNT(*) as borrow_count')
+            ->whereNotNull('asset_id')
+            ->whereNotNull('parent_borrowing_id')
             ->whereYear('borrow_date', $year);
 
         if ($month) {
