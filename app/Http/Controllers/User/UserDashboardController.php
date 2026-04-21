@@ -16,20 +16,24 @@ class UserDashboardController extends Controller
         $userId = auth()->id();
 
         $activeBorrows = Borrowing::where('user_id', $userId)
-            ->whereIn('status', ['active'])
+            ->where('status', 'active')
+            ->whereNotNull('parent_borrowing_id')
             ->count();
 
         $overdueCount = Borrowing::where('user_id', $userId)
             ->where('status', 'overdue')
+            ->whereNotNull('parent_borrowing_id')
             ->count();
 
         $pendingRequests = Borrowing::where('user_id', $userId)
             ->where('status', 'pending')
+            ->whereNull('parent_borrowing_id')
             ->count();
 
         $myBorrowedAssets = Borrowing::with(['asset', 'assetGroup'])
             ->where('user_id', $userId)
-            ->whereIn('status', ['active', 'overdue', 'approved'])
+            ->whereIn('status', ['active', 'overdue'])
+            ->whereNotNull('parent_borrowing_id')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
