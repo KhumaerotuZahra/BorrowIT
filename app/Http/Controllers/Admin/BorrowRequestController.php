@@ -8,6 +8,7 @@ use App\Models\AssetGroup;
 use App\Models\Borrowing;
 use App\Models\User;
 use App\Models\Notification;
+use App\Helpers\EmailHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -102,13 +103,21 @@ class BorrowRequestController extends Controller
         ]);
 
         $groupName = $borrowing->assetGroup->group_name ?? 'Asset';
+        $msg = "Your request to borrow {$groupName} (qty: {$borrowing->quantity}) has been approved.";
         Notification::send(
             $borrowing->user_id,
             'borrow_approved',
             'Borrow Request Approved',
-            "Your request to borrow {$groupName} (qty: {$borrowing->quantity}) has been approved.",
+            $msg,
             ['borrowing_id' => $borrowing->id]
         );
+
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'approved', 'Borrow Request Approved', $msg, [
+            'Asset Group' => $groupName,
+            'Quantity' => $borrowing->quantity,
+            'Borrow Date' => $borrowing->borrow_date->format('d M Y'),
+            'Due Date' => $borrowing->due_date->format('d M Y'),
+        ]);
 
         return back()->with('success', 'Request approved successfully!');
     }
@@ -118,13 +127,19 @@ class BorrowRequestController extends Controller
         $borrowing->update(['status' => 'rejected']);
 
         $groupName = $borrowing->assetGroup->group_name ?? 'Asset';
+        $msg = "Your request to borrow {$groupName} has been rejected.";
         Notification::send(
             $borrowing->user_id,
             'borrow_rejected',
             'Borrow Request Rejected',
-            "Your request to borrow {$groupName} has been rejected.",
+            $msg,
             ['borrowing_id' => $borrowing->id]
         );
+
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'rejected', 'Borrow Request Rejected', $msg, [
+            'Asset Group' => $groupName,
+            'Quantity' => $borrowing->quantity,
+        ]);
 
         return back()->with('success', 'Request rejected.');
     }
@@ -196,13 +211,22 @@ class BorrowRequestController extends Controller
         ]);
 
         $groupName = $borrowing->assetGroup->group_name ?? 'Asset';
+        $msg = "The asset(s) {$groupName} (qty: {$quantity}) have been handed over to you. Due: {$borrowing->due_date->format('d M Y')}.";
         Notification::send(
             $borrowing->user_id,
             'borrow_handover',
             'Asset Handed Over',
-            "The asset(s) {$groupName} (qty: {$quantity}) have been handed over to you. Due: {$borrowing->due_date->format('d M Y')}.",
+            $msg,
             ['borrowing_id' => $borrowing->id]
         );
+
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'handover', 'Asset Handed Over', $msg, [
+            'Asset Group' => $groupName,
+            'Quantity' => $quantity,
+            'Borrow Date' => $borrowDate,
+            'Due Date' => $borrowing->due_date->format('d M Y'),
+            'Handover By' => $request->handover_by,
+        ]);
 
         return back()->with('success', 'Asset(s) handed over successfully!');
     }

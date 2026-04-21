@@ -7,6 +7,7 @@ use App\Models\AssetGroup;
 use App\Models\Borrowing;
 use App\Models\Notification;
 use App\Models\User;
+use App\Helpers\EmailHelper;
 use Illuminate\Http\Request;
 
 class BorrowingController extends Controller
@@ -63,14 +64,23 @@ class BorrowingController extends Controller
         ]);
 
         $admins = User::where('role', 'admin')->get();
+        $msg = auth()->user()->name . " has requested to borrow {$group->group_name} (Qty: {$request->quantity}).";
         foreach ($admins as $admin) {
             Notification::send(
                 $admin->id,
                 'new_request',
                 'New Borrow Request',
-                auth()->user()->name . " has requested to borrow {$group->group_name} (Qty: {$request->quantity}).",
+                $msg,
                 ['borrowing_id' => $borrowing->id]
             );
+
+            EmailHelper::sendBorrowEmail($admin->id, 'new_request', 'New Borrow Request', $msg, [
+                'Requested By' => auth()->user()->name,
+                'Asset Group' => $group->group_name,
+                'Quantity' => $request->quantity,
+                'Borrow Date' => $request->borrow_date,
+                'Due Date' => $request->due_date,
+            ]);
         }
 
         return redirect()->route('user.borrowings.index')->with('success', 'Borrow request submitted successfully!');

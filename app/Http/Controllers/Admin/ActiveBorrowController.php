@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Borrowing;
 use App\Models\User;
 use App\Models\Notification;
+use App\Helpers\EmailHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -78,13 +79,20 @@ class ActiveBorrowController extends Controller
         }
 
         $assetName = $borrowing->asset->asset_name ?? 'Asset';
+        $msg = "The asset {$assetName} has been marked as returned. Thank you!";
         Notification::send(
             $borrowing->user_id,
             'borrow_returned',
             'Asset Returned',
-            "The asset {$assetName} has been marked as returned. Thank you!",
+            $msg,
             ['borrowing_id' => $borrowing->id]
         );
+
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'returned', 'Asset Returned', $msg, [
+            'Asset' => $assetName,
+            'Return Date' => now()->format('d M Y'),
+            'Return PIC' => $request->return_pic ?? '-',
+        ]);
 
         return back()->with('success', 'Asset marked as returned successfully!');
     }
