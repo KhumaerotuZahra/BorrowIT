@@ -18,7 +18,7 @@
                 </form>
                 <button class="btn btn-primary" onclick="openModal('add-request-modal')">
                     <i data-lucide="plus"></i>
-                    + Request
+                    Request
                 </button>
             </div>
         </div>
@@ -54,10 +54,14 @@
                             <td>{{ $borrow->quantity }}</td>
                             <td style="font-size:12px;">{{ $borrow->created_at->format('d M Y') }}</td>
                             <td style="font-size:12px;">
-                                {{ $borrow->borrow_date->format('d/m') }} - {{ $borrow->due_date->format('d/m/Y') }}
+                                @php
+                                    $days = $borrow->borrow_date->diffInDays($borrow->due_date);
+                                @endphp
+                                {{ $days }}{{ $days == 1 ? ' day' : ' days' }}
                             </td>
                             <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
-                            <td style="font-size:12px;">{{ $borrow->approved_date ? $borrow->approved_date->format('d M Y') : '-' }}</td>
+                            <td style="font-size:12px;">
+                                {{ $borrow->approved_date ? $borrow->approved_date->format('d M Y') : '-' }}</td>
                             <td>
                                 <div class="action-btns">
                                     @if($borrow->status === 'pending')

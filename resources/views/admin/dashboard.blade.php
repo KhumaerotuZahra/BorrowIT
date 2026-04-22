@@ -38,9 +38,9 @@
             </div>
         </a>
         <a href="{{ route('admin.active-borrows.index', ['status' => 'overdue']) }}" style="text-decoration:none;color:inherit;">
-            <div class="stat-card" style="cursor:pointer;border-left:4px solid #ef4444;">
-                <div class="stat-icon" style="color:#ef4444;"><i data-lucide="alert-triangle"></i></div>
-                <div class="stat-value" style="color:#ef4444;">{{ $overdueCount }}</div>
+            <div class="stat-card danger" style="cursor:pointer;">
+                <div class="stat-icon"><i data-lucide="alert-triangle"></i></div>
+                <div class="stat-value">{{ $overdueCount }}</div>
                 <div class="stat-label">Overdue</div>
             </div>
         </a>
@@ -70,7 +70,7 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Request ID</th>
+                            <th>No</th>
                             <th>User</th>
                             <th>Asset</th>
                             <th>Borrow Date</th>
@@ -81,7 +81,7 @@
                     <tbody>
                         @forelse($recentRequests as $request)
                             <tr>
-                                <td class="font-mono">REQ-{{ str_pad($request->id, 4, '0', STR_PAD_LEFT) }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>
                                     <div style="display:flex;align-items:center;gap:8px;">
                                         <div class="avatar-circle" style="width:30px;height:30px;font-size:11px;">{{ strtoupper(substr($request->user->name, 0, 1)) }}</div>
@@ -121,7 +121,7 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Borrow ID</th>
+                            <th>No</th>
                             <th>User</th>
                             <th>Asset</th>
                             <th>Borrow Date</th>
@@ -132,7 +132,7 @@
                     <tbody>
                         @forelse($activeBorrowings as $borrow)
                             <tr>
-                                <td class="font-mono">BRW-{{ str_pad($borrow->id, 4, '0', STR_PAD_LEFT) }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>
                                     <div style="display:flex;align-items:center;gap:8px;">
                                         <div class="avatar-circle" style="width:30px;height:30px;font-size:11px;">{{ strtoupper(substr($borrow->user->name, 0, 1)) }}</div>

@@ -88,7 +88,7 @@ class Borrowing extends Model
                 $borrow->user_id,
                 'borrow_overdue',
                 'Overdue: Please Return Asset',
-                "Your borrowed asset \"{$borrow->asset->asset_name}\" is overdue (due: {$borrow->due_date->format('d M Y')}). Please return it immediately.",
+                "Your borrowed asset \"{$borrow->asset?->asset_name}\" is overdue (due: {$borrow->due_date->format('d M Y')}). Please return it immediately.",
                 ['borrowing_id' => $borrow->id]
             );
 
@@ -99,7 +99,7 @@ class Borrowing extends Model
                     $admin->id,
                     'borrow_overdue',
                     'Overdue Borrowing Alert',
-                    "Asset \"{$borrow->asset->asset_name}\" borrowed by {$borrow->user->name} is overdue (due: {$borrow->due_date->format('d M Y')}).",
+                    "Asset \"{$borrow->asset?->asset_name}\" borrowed by {$borrow->user->name} is overdue (due: {$borrow->due_date->format('d M Y')}).",
                     ['borrowing_id' => $borrow->id]
                 );
             }
