@@ -31,7 +31,7 @@
                 <input type="hidden" name="token" value="{{ $token }}">
                 <div class="form-group">
                     <label class="form-label" for="email">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ $email ?? old('email') }}" placeholder="yourname@gmail.com" required>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ $email ?? old('email') }}" placeholder="yourname@ptbpi.co.id" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="password">New Password</label>
