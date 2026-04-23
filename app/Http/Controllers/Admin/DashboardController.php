@@ -89,6 +89,7 @@ class DashboardController extends Controller
 
         $returnedQuery = Borrowing::with(['user', 'asset', 'assetGroup'])
             ->where('status', 'returned')
+            ->whereNotNull('parent_borrowing_id')
             ->whereYear('return_date', $year);
         if ($month) {
             $returnedQuery->whereMonth('return_date', $month);
