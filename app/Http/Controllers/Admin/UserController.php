@@ -21,7 +21,8 @@ class UserController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('department', 'like', "%{$search}%");
+                  ->orWhere('department', 'like', "%{$search}%")
+                  ->orWhere('employee_id','like', "%{$search}%");
             });
         }
 
@@ -29,7 +30,7 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        $users = $query->orderBy('created_at', 'asc')->paginate(10);
+        $users = $query->orderBy('employee_id', 'asc')->paginate(10);
         $departments = ['IT', 'HR', 'Finance', 'Marketing', 'Operations', 'Engineering', 'Sales', 'Support'];
 
         return view('admin.users.index', compact('users', 'departments'));
