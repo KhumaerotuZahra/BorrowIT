@@ -272,7 +272,7 @@
 @push('scripts')
 <script>
 function openEditUser(id, name, email, department, role, status, employee_id) {
-    document.getElementById('edit-user-form').action = '/admin/users/' + id;
+    document.getElementById('edit-user-form').action = '{{ url('admin/users') }}/' + id;
     document.getElementById('edit-name').value = name;
     document.getElementById('edit-email').value = email;
     document.getElementById('edit-department').value = department;

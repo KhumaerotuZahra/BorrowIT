@@ -215,7 +215,7 @@
 @push('scripts')
 <script>
 function openHandoverModal(id, groupName, userName, quantity, groupId) {
-    document.getElementById('handover-form').action = '/admin/borrow-requests/' + id + '/handover';
+    document.getElementById('handover-form').action ="{{ url('admin/borrow-requests') }}/" + id + "/handover";
     document.getElementById('handover-info').textContent = 'Handing over "' + groupName + '" (qty: ' + quantity + ') to ' + userName;
     document.getElementById('handover-group-name').value = groupName;
 
@@ -223,7 +223,7 @@ function openHandoverModal(id, groupName, userName, quantity, groupId) {
     const container = document.getElementById('asset-select-container');
     container.innerHTML = '<p style="font-size:12px;color:var(--text-muted);">Loading assets...</p>';
 
-    fetch('/admin/borrow-requests/group-assets/' + groupId)
+    fetch("{{ url('admin/borrow-requests/group-assets') }}/" + groupId)
         .then(r => r.json())
         .then(assets => {
             container.innerHTML = '';

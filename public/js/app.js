@@ -62,14 +62,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(loadUnreadCount, 30000);
 
     function loadUnreadCount() {
-        fetch('/notifications/unread-count')
+        fetch(window.baseUrl + '/notifications/unread-count')
             .then(r => r.json())
             .then(data => {
                 const badge = document.getElementById('notification-badge');
                 if (badge) {
                     if (data.count > 0) {
                         badge.textContent = data.count > 99 ? '99+' : data.count;
-                        badge.style.display = 'flex';
+                        badge.style.display = 'inline-block';
                     } else {
                         badge.style.display = 'none';
                     }
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadNotifications() {
-        fetch('/notifications/latest')
+        fetch(window.baseUrl + '/notifications/latest')
             .then(r => r.json())
             .then(notifications => {
                 const list = document.getElementById('notif-list');

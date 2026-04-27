@@ -133,7 +133,7 @@
 @push('scripts')
 <script>
 function openReturnModal(id, assetName, userName) {
-    document.getElementById('return-form').action = '/admin/active-borrows/' + id + '/return';
+    document.getElementById('return-form').action ="{{ url('admin/active-borrows') }}/" + id + "/return";
     document.getElementById('return-info').textContent = 'Returning "' + assetName + '" from ' + userName;
     openModal('return-modal');
     lucide.createIcons();

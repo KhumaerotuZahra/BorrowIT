@@ -204,7 +204,7 @@
 @push('scripts')
 <script>
 function openEditAsset(id, groupId, number, name, stock) {
-    document.getElementById('edit-asset-form').action = '/admin/assets/' + id;
+    document.getElementById('edit-asset-form').action = '{{ url('admin/assets') }}/' + id;
     document.getElementById('edit-asset-group').value = groupId || '';
     document.getElementById('edit-asset-number').value = number;
     document.getElementById('edit-asset-name').value = name;

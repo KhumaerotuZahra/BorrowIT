@@ -53,6 +53,10 @@
 
     @stack('modals')
 
+    <script>
+        window.baseUrl = "{{ url('/') }}";
+    </script>
+
     <script src="{{ asset('js/app.js') }}" defer></script>
     @stack('scripts')
     <script>

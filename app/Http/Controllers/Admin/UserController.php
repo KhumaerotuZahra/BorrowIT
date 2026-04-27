@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Imports\UsersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
@@ -64,7 +65,10 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'employee_id' => 'required|unique:users,employee_id',
+            'employee_id' => [
+                'required', 
+                Rule::unique('users', 'employee_id')->ignore($user->id),
+            ],
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', 'unique:users,email,' . $user->id, 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
             'department' => 'required|string',

@@ -127,7 +127,7 @@
 @push('scripts')
 <script>
 function openEditGroup(id, code, name) {
-    document.getElementById('edit-group-form').action = '/admin/asset-groups/' + id;
+    document.getElementById('edit-group-form').action = '{{ url('admin/asset-groups') }}/' + id;
     document.getElementById('edit-group-code').value = code;
     document.getElementById('edit-group-name').value = name;
     openModal('edit-group-modal');
