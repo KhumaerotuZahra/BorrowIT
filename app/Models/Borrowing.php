@@ -27,6 +27,7 @@ class Borrowing extends Model
         'return_pic',
         'return_notes',
         'purpose',
+        'notes',
         'parent_borrowing_id',
     ];
 

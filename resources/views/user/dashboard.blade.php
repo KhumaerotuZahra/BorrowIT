@@ -3,9 +3,15 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <div class="page-header">
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Welcome back, {{ auth()->user()->name }}!</p>
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Welcome back, {{ auth()->user()->name }}!</p>
+        </div>
+        <a href="{{ route('user.borrowings.index', ['open' => 'new']) }}" class="btn btn-primary">
+            <i data-lucide="plus"></i>
+            New Request
+        </a>
     </div>
 
     <div class="stats-grid">

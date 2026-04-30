@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/borrow-requests/{borrowing}/approve', [BorrowRequestController::class, 'approve'])->name('borrow-requests.approve');
         Route::post('/borrow-requests/{borrowing}/reject', [BorrowRequestController::class, 'reject'])->name('borrow-requests.reject');
         Route::post('/borrow-requests/{borrowing}/handover', [BorrowRequestController::class, 'handover'])->name('borrow-requests.handover');
+        Route::post('/borrow-requests/{borrowing}/cancel', [BorrowRequestController::class, 'cancel'])->name('borrow-requests.cancel');
         Route::get('/borrow-requests/group-assets/{assetGroup}', [BorrowRequestController::class, 'getGroupAssets'])->name('borrow-requests.group-assets');
 
         // Active Borrows
@@ -92,6 +93,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
         Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
         Route::post('/borrowings', [BorrowingController::class, 'store'])->name('borrowings.store');
+        Route::post('/borrowings/{borrowing}/cancel', [BorrowingController::class, 'cancel'])->name('borrowings.cancel');
         Route::get('/notifications', [NotificationController::class, 'userIndex'])->name('notifications.index');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     });

@@ -31,7 +31,7 @@
             </a>
             <a href="{{ route('admin.active-borrows.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.active-borrows') ? 'active' : '' }}">
                 <i data-lucide="repeat"></i>
-                <span>Active Borrow</span>
+                <span>List Borrow</span>
             </a>
             <a href="{{ route('admin.notifications.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.notifications') ? 'active' : '' }}">
                 <i data-lucide="bell"></i>

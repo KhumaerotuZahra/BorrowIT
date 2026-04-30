@@ -28,8 +28,10 @@
                         <th>Borrow Date</th>
                         <th>Due Date</th>
                         <th>Handover PIC</th>
+                        <th>Handover Notes</th>
                         <th>Status</th>
                         <th>Return PIC</th>
+                        <th>Return Notes</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -60,8 +62,10 @@
                                 @endif
                             </td>
                             <td style="font-size:12px;">{{ $borrow->handover_by ?? '-' }}</td>
+                            <td style="font-size:12px;">{{ $borrow->handover_notes ?? '-' }}</td>
                             <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
                             <td style="font-size:12px;">{{ $borrow->return_pic ?? '-' }}</td>
+                            <td style="font-size:12px;">{{ $borrow->return_notes ?? '-' }}</td>
                             <td>
                                 @if(in_array($borrow->status, ['active', 'overdue']))
                                     <button class="btn btn-primary btn-sm" onclick="openReturnModal({{ $borrow->id }}, '{{ addslashes($borrow->asset->asset_name ?? '') }}', '{{ $borrow->user->name }}')">
@@ -115,7 +119,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Notes (Optional)</label>
+                <label class="form-label">Notes</label>
                 <textarea class="form-control" name="return_notes" placeholder="Any notes about the return..." rows="3"></textarea>
             </div>
         </div>

@@ -60,6 +60,7 @@ class BorrowingController extends Controller
             'quantity' => $request->quantity,
             'borrow_date' => $request->borrow_date,
             'due_date' => $request->due_date,
+            'notes' => $request->notes,
             'status' => 'pending',
         ]);
 
@@ -84,5 +85,17 @@ class BorrowingController extends Controller
         }
 
         return redirect()->route('user.borrowings.index')->with('success', 'Borrow request submitted successfully!');
+    }
+
+    public function cancel(Borrowing $borrowing)
+    {
+        // Only allow cancelling own pending requests
+        if ($borrowing->user_id !== auth()->id() || $borrowing->status !== 'pending') {
+            return back()->with('error', 'Cannot cancel this request.');
+        }
+
+        $borrowing->update(['status' => 'cancelled']);
+
+        return redirect()->route('user.borrowings.index')->with('success', 'Request cancelled successfully.');
     }
 }

@@ -43,6 +43,7 @@
                         <th>Borrow Date</th>
                         <th>Due Date</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,9 +66,21 @@
                                     {{ ucfirst($borrow->status) }}
                                 </span>
                             </td>
+                            <td>
+                                @if($borrow->status === 'pending')
+                                    <form method="POST" action="{{ route('user.borrowings.cancel', $borrow) }}" style="display:inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this request?')" style="padding:4px 10px;">
+                                            <i data-lucide="x" style="width:14px;height:14px;"></i> Cancel
+                                        </button>
+                                    </form>
+                                @else
+                                    <span style="font-size:12px;color:var(--text-muted);">-</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6">
+                        <tr><td colspan="7">
                             <div class="empty-state">
                                 <i data-lucide="book-open"></i>
                                 <p class="empty-title">No borrowings yet</p>
@@ -118,6 +131,10 @@
                     <input type="date" class="form-control" name="due_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}">
                 </div>
             </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-control" name="notes" rows="2" placeholder="Purpose or additional notes..."></textarea>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
@@ -128,4 +145,15 @@
         </div>
     </form>
 </div>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('open') === 'new') {
+        openModal('new-borrow-modal');
+    }
+});
+</script>
 @endpush

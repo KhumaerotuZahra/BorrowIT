@@ -79,6 +79,7 @@ class BorrowRequestController extends Controller
             'quantity' => $request->quantity,
             'borrow_date' => $request->borrow_date,
             'due_date' => $request->due_date,
+            'notes' => $request->notes,
             'status' => 'pending',
         ]);
 
@@ -122,12 +123,17 @@ class BorrowRequestController extends Controller
         return back()->with('success', 'Request approved successfully!');
     }
 
-    public function reject(Borrowing $borrowing)
+    public function reject(Request $request, Borrowing $borrowing)
     {
-        $borrowing->update(['status' => 'rejected']);
+        $rejectNotes = $request->reject_notes ?? '';
+        $borrowing->update([
+            'status' => 'rejected',
+            'notes' => $rejectNotes,
+        ]);
 
         $groupName = $borrowing->assetGroup->group_name ?? 'Asset';
-        $msg = "Your request to borrow {$groupName} has been rejected.";
+        $reasonText = $rejectNotes ? " Reason: {$rejectNotes}" : '';
+        $msg = "Your request to borrow {$groupName} has been rejected.{$reasonText}";
         Notification::send(
             $borrowing->user_id,
             'borrow_rejected',
@@ -139,9 +145,32 @@ class BorrowRequestController extends Controller
         EmailHelper::sendBorrowEmail($borrowing->user_id, 'rejected', 'Borrow Request Rejected', $msg, [
             'Asset Group' => $groupName,
             'Quantity' => $borrowing->quantity,
+            'Reason' => $rejectNotes ?: '-',
         ]);
 
         return back()->with('success', 'Request rejected.');
+    }
+
+    public function cancel(Borrowing $borrowing)
+    {
+        $borrowing->update(['status' => 'cancelled']);
+
+        $groupName = $borrowing->assetGroup->group_name ?? 'Asset';
+        $msg = "Your approved request to borrow {$groupName} has been cancelled by admin.";
+        Notification::send(
+            $borrowing->user_id,
+            'borrow_cancelled',
+            'Borrow Request Cancelled',
+            $msg,
+            ['borrowing_id' => $borrowing->id]
+        );
+
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'rejected', 'Borrow Request Cancelled', $msg, [
+            'Asset Group' => $groupName,
+            'Quantity' => $borrowing->quantity,
+        ]);
+
+        return back()->with('success', 'Request cancelled.');
     }
 
     // Get available assets for a group (API for handover modal)

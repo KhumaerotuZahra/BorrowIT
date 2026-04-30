@@ -128,21 +128,19 @@ class UserController extends Controller
 
     public function exportTemplate()
     {
-        $filename = 'template_import_users.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
-
         $callback = function () {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['employee_id', 'name', 'email', 'department', 'role', 'status']);
-            fputcsv($file, ['EMP001', 'Budi Santoso', 'budi@ptbpi.co.id', 'IT', 'user', 'active']);
-            fputcsv($file, ['EMP002', 'Siti Rahayu', 'siti@ptbpi.co.id', 'HR', 'admin', 'active']);
+            // UTF-8 BOM for Excel compatibility
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($file, ['employee_id', 'name', 'email', 'department', 'password']);
+            fputcsv($file, ['EMP001', 'Budi Santoso', 'budi@gmail.com', 'IT', 'password123']);
+            fputcsv($file, ['EMP002', 'Siti Rahayu', 'siti@gmail.com', 'HR', 'password123']);
             fclose($file);
         };
 
-        return response()->stream($callback, 200, $headers);
+        return response()->streamDownload($callback, 'template_import_users.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
     }
 
     public function destroy(User $user)

@@ -62,9 +62,18 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(loadUnreadCount, 30000);
 
     function loadUnreadCount() {
-        fetch(window.baseUrl + '/notifications/unread-count')
-            .then(r => r.json())
+        fetch(window.baseUrl + '/notifications/unread-count', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(r => {
+                if (r.status === 401 || r.redirected) {
+                    window.location.href = window.baseUrl + '/login';
+                    return null;
+                }
+                return r.json();
+            })
             .then(data => {
+                if (!data) return;
                 const badge = document.getElementById('notification-badge');
                 if (badge) {
                     if (data.count > 0) {

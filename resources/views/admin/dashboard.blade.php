@@ -60,10 +60,10 @@
     </div>
 
     <div class="content-grid">
-        {{-- Recent Borrow Request --}}
+        {{-- List Borrow Request --}}
         <div class="table-card">
             <div class="table-header">
-                <h3 class="table-title">Recent Borrow Request</h3>
+                <h3 class="table-title">List Borrow Request</h3>
                 <a href="{{ route('admin.borrow-requests.index') }}" class="btn btn-outline btn-sm">View All</a>
             </div>
             <div class="table-responsive">
@@ -72,10 +72,12 @@
                         <tr>
                             <th>No</th>
                             <th>User</th>
-                            <th>Asset</th>
-                            <th>Borrow Date</th>
+                            <th>Asset Group</th>
+                            <th>Qty</th>
+                            <th>Request Date</th>
                             <th>Duration</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -85,21 +87,48 @@
                                 <td>
                                     <div style="display:flex;align-items:center;gap:8px;">
                                         <div class="avatar-circle" style="width:30px;height:30px;font-size:11px;">{{ strtoupper(substr($request->user->name, 0, 1)) }}</div>
-                                        <span>{{ $request->user->name }}</span>
+                                        <div>
+                                            <span style="font-weight:500;">{{ $request->user->name }}</span>
+                                            <br><small style="color:var(--text-muted);font-size:11px;">{{ $request->user->department ?? '' }}</small>
+                                        </div>
                                     </div>
                                 </td>
-                                <td>{{ $request->assetGroup->group_name ?? ($request->asset->asset_name ?? '-') }}</td>
-                                <td style="font-size:12px;">{{ $request->borrow_date->format('d M Y') }}</td>
+                                <td>{{ $request->assetGroup->group_name ?? '-' }}</td>
+                                <td>{{ $request->quantity }}</td>
+                                <td style="font-size:12px;">{{ $request->created_at->format('d M Y') }}</td>
                                 <td style="font-size:12px;">
-                                    @php
-                                        $days = $request->borrow_date->diffInDays($request->due_date);
-                                    @endphp
+                                    @php $days = $request->borrow_date->diffInDays($request->due_date); @endphp
                                     {{ $days }} {{ $days == 1 ? 'day' : 'days' }}
                                 </td>
-                                <td><span class="badge badge-{{ $request->status }}">{{ ucfirst($request->status) }}</span></td>
+                                <td>
+                                    @if($request->status === 'approved')
+                                        <a href="{{ route('admin.borrow-requests.index', ['status' => 'approved']) }}" style="text-decoration:none;">
+                                            <span class="badge badge-approved" style="cursor:pointer;">Approved</span>
+                                        </a>
+                                    @else
+                                        <span class="badge badge-{{ $request->status }}">{{ ucfirst($request->status) }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($request->status === 'pending')
+                                        <div style="display:flex;gap:6px;">
+                                            <form method="POST" action="{{ route('admin.borrow-requests.approve', $request) }}" style="display:inline;">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success btn-sm" style="padding:4px 8px;min-width:auto;" title="Approve" onclick="return confirm('Approve this request?')">
+                                                    <i data-lucide="check" style="width:14px;height:14px;"></i>
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-danger btn-sm" style="padding:4px 8px;min-width:auto;" title="Reject" onclick="openRejectModal({{ $request->id }})">
+                                                <i data-lucide="x" style="width:14px;height:14px;"></i>
+                                            </button>
+                                        </div>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6">
+                            <tr><td colspan="8">
                                 <div class="empty-state">
                                     <i data-lucide="inbox"></i>
                                     <p class="empty-title">No pending requests</p>
@@ -159,6 +188,30 @@
     </div>
 @endsection
 
+@push('modals')
+<div class="modal" id="reject-modal" style="display:none;">
+    <div class="modal-content" style="max-width:440px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Reject Request</h3>
+            <button class="modal-close" onclick="closeAllModals()">&times;</button>
+        </div>
+        <form id="reject-form" method="POST">
+            @csrf
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Reason for Rejection</label>
+                    <textarea class="form-control" name="reject_notes" rows="3" placeholder="Enter reason for rejecting this request..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
+                <button type="submit" class="btn btn-danger">Reject Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endpush
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -207,5 +260,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function openRejectModal(borrowingId) {
+    const form = document.getElementById('reject-form');
+    form.action = window.baseUrl + '/admin/borrow-requests/' + borrowingId + '/reject';
+    openModal('reject-modal');
+}
 </script>
 @endpush

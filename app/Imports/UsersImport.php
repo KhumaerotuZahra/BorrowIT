@@ -53,7 +53,7 @@ class UsersImport implements ToModel, WithHeadingRow, SkipsEmptyRows, WithValida
             'employee_id' => $employeeId,
             'name'        => $name,
             'email'       => $email,
-            'password'    => Hash::make('password123'),
+            'password'    => Hash::make($row['password'] ?? 'password123'),
             'department'  => $department,
             'role'        => $role,
             'status'      => $status,

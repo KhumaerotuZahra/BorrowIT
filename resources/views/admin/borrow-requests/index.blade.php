@@ -33,6 +33,7 @@
                         <th>Request Date</th>
                         <th>Duration</th>
                         <th>Status</th>
+                        <th>Note</th>
                         <th>Approve Date</th>
                         <th>Actions</th>
                     </tr>
@@ -60,6 +61,15 @@
                                 {{ $days }}{{ $days == 1 ? ' day' : ' days' }}
                             </td>
                             <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
+                            <td>
+                                @if($borrow->notes)
+                                    <button type="button" class="btn btn-ghost btn-sm btn-icon" title="View Notes" onclick="alert('{{ addslashes($borrow->notes) }}')" style="color:var(--primary);">
+                                        <i data-lucide="file-text" style="width:16px;height:16px;"></i>
+                                    </button>
+                                @else
+                                    <span style="font-size:12px;color:var(--text-muted);">-</span>
+                                @endif
+                            </td>
                             <td style="font-size:12px;">
                                 {{ $borrow->approved_date ? $borrow->approved_date->format('d M Y') : '-' }}</td>
                             <td>
@@ -71,16 +81,19 @@
                                                 <i data-lucide="check"></i>
                                             </button>
                                         </form>
-                                        <form method="POST" action="{{ route('admin.borrow-requests.reject', $borrow) }}" class="inline-form">
-                                            @csrf
-                                            <button type="submit" class="btn btn-ghost btn-sm btn-icon" style="color:var(--danger);" title="Reject" onclick="return confirm('Reject this request?')">
-                                                <i data-lucide="x"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-ghost btn-sm btn-icon" style="color:var(--danger);" title="Reject" onclick="openRejectModal({{ $borrow->id }})">
+                                            <i data-lucide="x"></i>
+                                        </button>
                                     @elseif($borrow->status === 'approved')
                                         <button class="btn btn-primary btn-sm" onclick="openHandoverModal({{ $borrow->id }}, '{{ addslashes($borrow->assetGroup->group_name ?? '') }}', '{{ $borrow->user->name }}', {{ $borrow->quantity }}, {{ $borrow->asset_group_id }})">
                                             Hand Over
                                         </button>
+                                        <form method="POST" action="{{ route('admin.borrow-requests.cancel', $borrow) }}" class="inline-form">
+                                            @csrf
+                                            <button type="submit" class="btn btn-ghost btn-sm btn-icon" style="color:var(--danger);" title="Cancel" onclick="return confirm('Cancel this approved request?')">
+                                                <i data-lucide="ban"></i>
+                                            </button>
+                                        </form>
                                     @else
                                         <span style="font-size:12px;color:var(--text-muted);">-</span>
                                     @endif
@@ -88,7 +101,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9">
+                        <tr><td colspan="10">
                             <div class="empty-state">
                                 <i data-lucide="inbox"></i>
                                 <p class="empty-title">No borrow requests</p>
@@ -148,6 +161,10 @@
                     <input type="date" class="form-control" name="due_date" required>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-control" name="notes" rows="2" placeholder="Purpose or additional notes..."></textarea>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
@@ -197,7 +214,7 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Notes (Optional)</label>
+                <label class="form-label">Notes</label>
                 <textarea class="form-control" name="handover_notes" placeholder="Any notes..." rows="3"></textarea>
             </div>
         </div>
@@ -247,5 +264,35 @@ function openHandoverModal(id, groupName, userName, quantity, groupId) {
     openModal('handover-modal');
     lucide.createIcons();
 }
+
+function openRejectModal(borrowingId) {
+    const form = document.getElementById('reject-form');
+    form.action = window.baseUrl + '/admin/borrow-requests/' + borrowingId + '/reject';
+    openModal('reject-modal');
+}
 </script>
+@endpush
+
+@push('modals')
+<div class="modal" id="reject-modal" style="display:none;">
+    <div class="modal-content" style="max-width:440px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Reject Request</h3>
+            <button class="modal-close" onclick="closeAllModals()">&times;</button>
+        </div>
+        <form id="reject-form" method="POST">
+            @csrf
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Reason for Rejection</label>
+                    <textarea class="form-control" name="reject_notes" rows="3" placeholder="Enter reason for rejecting this request..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
+                <button type="submit" class="btn btn-danger">Reject Request</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endpush
