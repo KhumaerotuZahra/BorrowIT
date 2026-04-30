@@ -32,7 +32,7 @@ class UserController extends Controller
         }
 
         $users = $query->orderBy('employee_id', 'asc')->paginate(10);
-        $departments = ['IT', 'HR', 'Finance', 'Marketing', 'Operations', 'Engineering', 'Sales', 'Support'];
+        $departments = ['HRGA', 'LOG-PROC', 'Finance & Tax', 'IT', 'HSE', 'Legal', 'PM & Coal-Fuel', 'Operation', 'Maintenance', 'CSR-SR'];
 
         return view('admin.users.index', compact('users', 'departments'));
     }

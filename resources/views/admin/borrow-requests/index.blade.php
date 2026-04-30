@@ -130,7 +130,7 @@
         @csrf
         <div class="modal-body">
             <div class="form-group">
-                <label class="form-label">User (Borrower)</label>
+                <label class="form-label">User</label>
                 <select class="form-control" name="user_id" required>
                     <option value="">Search and select user...</option>
                     @foreach($users as $user)

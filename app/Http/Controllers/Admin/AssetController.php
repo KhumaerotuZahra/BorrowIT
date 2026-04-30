@@ -105,7 +105,7 @@ class AssetController extends Controller
         $callback = function () {
             $file = fopen('php://output', 'w');
             fputcsv($file, ['group_code', 'asset_number', 'asset_name', 'available_stock']);
-            fputcsv($file, ['LPT', 'LAP-001', 'Laptop Dell XPS 15', 5]);
+            fputcsv($file, ['LTP', 'LAP-001', 'Laptop Dell XPS 15', 5]);
             fputcsv($file, ['MSE', 'MSE-001', 'Mouse Logitech M590', 10]);
             fclose($file);
         };
