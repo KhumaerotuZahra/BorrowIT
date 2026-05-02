@@ -131,7 +131,7 @@
                             <tr><td colspan="8">
                                 <div class="empty-state">
                                     <i data-lucide="inbox"></i>
-                                    <p class="empty-title">No pending requests</p>
+                                    <p class="empty-title">No borrow requests</p>
                                 </div>
                             </td></tr>
                         @endforelse

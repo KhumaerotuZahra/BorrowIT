@@ -94,6 +94,6 @@ class ActiveBorrowController extends Controller
             'Return PIC' => $request->return_pic ?? '-',
         ]);
 
-        return back()->with('success', 'Asset marked as returned successfully!');
+        return redirect()->route('admin.active-borrows.index')->with('success', 'Asset marked as returned successfully!');
     }
 }

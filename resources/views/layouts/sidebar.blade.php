@@ -13,18 +13,28 @@
                 <i data-lucide="layout-dashboard"></i>
                 <span>Dashboard</span>
             </a>
+
+            <div class="nav-section-title">User Management</div>
             <a href="{{ route('admin.users.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.users') ? 'active' : '' }}">
                 <i data-lucide="users"></i>
-                <span>Manage Users</span>
+                <span>User</span>
             </a>
+            <a href="{{ route('admin.departments.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.departments') ? 'active' : '' }}">
+                <i data-lucide="building-2"></i>
+                <span>Department</span>
+            </a>
+
+            <div class="nav-section-title">Asset Management</div>
             <a href="{{ route('admin.asset-groups.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.asset-groups') ? 'active' : '' }}">
                 <i data-lucide="folder"></i>
                 <span>Asset Group</span>
             </a>
             <a href="{{ route('admin.assets.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.assets') ? 'active' : '' }}">
                 <i data-lucide="package"></i>
-                <span>Asset Management</span>
+                <span>Asset</span>
             </a>
+
+            <div class="nav-section-title">Borrowing</div>
             <a href="{{ route('admin.borrow-requests.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.borrow-requests') ? 'active' : '' }}">
                 <i data-lucide="file-text"></i>
                 <span>Borrow Request</span>
@@ -33,6 +43,8 @@
                 <i data-lucide="repeat"></i>
                 <span>List Borrow</span>
             </a>
+
+            <div class="nav-section-title">System</div>
             <a href="{{ route('admin.notifications.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.notifications') ? 'active' : '' }}">
                 <i data-lucide="bell"></i>
                 <span>Notification</span>

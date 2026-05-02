@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AssetGroupController;
 use App\Http\Controllers\Admin\AssetController;
@@ -54,6 +55,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/users/import', [UserController::class, 'importExcel'])->name('users.import');
         Route::get('/users/export-template', [UserController::class, 'exportTemplate'])->name('users.export-template');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+        // Departments
+        Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
+        Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
+        Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
+        Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy');
+        Route::post('/departments/import', [DepartmentController::class, 'importExcel'])->name('departments.import');
+        Route::get('/departments/export-template', [DepartmentController::class, 'exportTemplate'])->name('departments.export-template');
 
         // Asset Groups
         Route::get('/asset-groups', [AssetGroupController::class, 'index'])->name('asset-groups.index');

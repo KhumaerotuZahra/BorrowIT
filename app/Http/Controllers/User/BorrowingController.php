@@ -16,7 +16,7 @@ class BorrowingController extends Controller
     {
         Borrowing::checkAndUpdateOverdue();
 
-        $query = Borrowing::with(['asset', 'assetGroup'])
+        $query = Borrowing::with(['asset', 'assetGroup', 'childBorrowings'])
             ->where('user_id', auth()->id())
             ->whereNull('parent_borrowing_id');
 

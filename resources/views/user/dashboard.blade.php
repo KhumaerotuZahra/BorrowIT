@@ -48,16 +48,21 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Asset Name</th>
+                            <th>No</th>
+                            <th>Asset Group</th>
+                            <th>Qty</th>
                             <th>Borrow Date</th>
                             <th>Due Date</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($myBorrowedAssets as $borrow)
                             <tr>
-                                <td style="font-weight:500;">{{ $borrow->asset->asset_name ?? ($borrow->assetGroup->group_name ?? '-') }}</td>
+                                <td>{{ $loop->iteration }}</td>
+                                <td style="font-weight:500;">{{ $borrow->assetGroup->group_name ?? ($borrow->asset->asset_name ?? '-') }}</td>
+                                <td>{{ $borrow->quantity }}</td>
                                 <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                                 <td style="font-size:12px;">
                                     {{ $borrow->due_date->format('d M Y') }}
@@ -68,9 +73,21 @@
                                     @endif
                                 </td>
                                 <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
+                                <td>
+                                    @if($borrow->status === 'pending')
+                                        <form method="POST" action="{{ route('user.borrowings.cancel', $borrow) }}" style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this request?')" style="padding:4px 10px;">
+                                                <i data-lucide="x" style="width:14px;height:14px;"></i> Cancel
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span style="font-size:12px;color:var(--text-muted);">-</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4">
+                            <tr><td colspan="7">
                                 <div class="empty-state">
                                     <i data-lucide="package-open"></i>
                                     <p class="empty-title">No borrowed assets</p>

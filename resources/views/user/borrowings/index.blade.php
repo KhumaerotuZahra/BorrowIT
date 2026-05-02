@@ -43,6 +43,8 @@
                         <th>Borrow Date</th>
                         <th>Due Date</th>
                         <th>Status</th>
+                        <th>Handover Notes</th>
+                        <th>Return Notes</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -66,6 +68,18 @@
                                     {{ ucfirst($borrow->status) }}
                                 </span>
                             </td>
+                            <td style="font-size:12px;">
+                                @php
+                                    $handoverNotes = $borrow->childBorrowings?->pluck('handover_notes')->filter()->unique()->implode(', ');
+                                @endphp
+                                {{ $handoverNotes ?: '-' }}
+                            </td>
+                            <td style="font-size:12px;">
+                                @php
+                                    $returnNotes = $borrow->childBorrowings?->pluck('return_notes')->filter()->unique()->implode(', ');
+                                @endphp
+                                {{ $returnNotes ?: '-' }}
+                            </td>
                             <td>
                                 @if($borrow->status === 'pending')
                                     <form method="POST" action="{{ route('user.borrowings.cancel', $borrow) }}" style="display:inline;">
@@ -80,7 +94,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7">
+                        <tr><td colspan="9">
                             <div class="empty-state">
                                 <i data-lucide="book-open"></i>
                                 <p class="empty-title">No borrowings yet</p>

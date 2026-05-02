@@ -157,7 +157,9 @@
                         <th>Asset</th>
                         <th>Borrow Date</th>
                         <th>Return Date</th>
+                        <th>Handover PIC</th>
                         <th>Status</th>
+                        <th>Return PIC</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -166,14 +168,15 @@
                             <td>{{ $loop->iteration }}</td>
                             <td style="font-weight:500;">{{ $borrow->user->name }}</td>
                             <td>{{ $borrow->user->department ?? '-' }}</td>
-                            <!-- <td>{{ $borrow->asset?->asset_name ?? ($borrow->assetGroup->group_name ?? '-') }}</td> -->
                             <td>{{ $borrow->asset?->asset_name ?? '-' }}</td>
                             <td style="font-size:12px;">{{ $borrow->borrow_date->format('d M Y') }}</td>
                             <td style="font-size:12px;">{{ $borrow->return_date ? $borrow->return_date->format('d M Y') : '-' }}</td>
+                            <td style="font-size:12px;">{{ $borrow->handover_by ?? '-' }}</td>
                             <td><span class="badge badge-{{ $borrow->status }}">{{ ucfirst($borrow->status) }}</span></td>
+                            <td style="font-size:12px;">{{ $borrow->return_pic ?? '-' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="7">
+                        <tr><td colspan="9">
                             <div class="empty-state">
                                 <i data-lucide="calendar"></i>
                                 <p class="empty-title">Belum ada data</p>
