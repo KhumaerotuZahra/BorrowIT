@@ -29,3 +29,5 @@ humanize.md
 /.agent
 /_agents
 /_agent
+*.zip
+*.xlsx
