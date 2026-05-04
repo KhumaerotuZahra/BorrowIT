@@ -22,13 +22,20 @@ class EmailHelper
     ): void {
         try {
             $user = User::find($userId);
-            if (!$user || !$user->email) return;
+            if (!$user || !$user->email) {
+                Log::warning("Email skipped: user {$userId} not found or no email.");
+                return;
+            }
+
+            Log::info("Sending email to {$user->email} [{$type}]: {$title}");
 
             Mail::to($user->email)->send(
                 new BorrowNotification($type, $user->name, $title, $body, $details)
             );
+
+            Log::info("Email sent successfully to {$user->email}");
         } catch (\Exception $e) {
-            Log::warning("Email send failed to user {$userId}: " . $e->getMessage());
+            Log::error("Email send failed to user {$userId} ({$type}): " . $e->getMessage());
         }
     }
 }
