@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Notification;
 use App\Imports\UsersImport;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -32,7 +33,7 @@ class UserController extends Controller
         }
 
         $users = $query->orderBy('employee_id', 'asc')->paginate(10);
-        $departments = ['HRGA', 'LOG-PROC', 'Finance & Tax', 'IT', 'HSE', 'Legal', 'PM & Coal-Fuel', 'Operation', 'Maintenance', 'CSR-SR'];
+        $departments = Department::orderBy('name')->get();
 
         return view('admin.users.index', compact('users', 'departments'));
     }
@@ -133,8 +134,8 @@ class UserController extends Controller
             // UTF-8 BOM for Excel compatibility
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, ['employee_id', 'name', 'email', 'department', 'password']);
-            fputcsv($file, ['EMP001', 'Budi Santoso', 'budi@gmail.com', 'IT', 'password123']);
-            fputcsv($file, ['EMP002', 'Siti Rahayu', 'siti@gmail.com', 'HR', 'password123']);
+            fputcsv($file, ['EMP001', 'Budi Santoso', 'budi@ptbpi.co.id', 'Information Technology', 'password123']);
+            fputcsv($file, ['EMP002', 'Siti Rahayu', 'siti@ptbpi.co.id', 'Maintenance', 'password123']);
             fclose($file);
         };
 

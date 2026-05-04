@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', 'Active Borrows')
+@section('title', 'List Borrows')
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">Active Borrows</h1>
+        <h1 class="page-title">List Borrows</h1>
         <p class="page-subtitle">Track and manage currently borrowed assets</p>
     </div>
 
     <div class="table-card">
         <div class="table-header">
-            <h3 class="table-title">Active Borrows</h3>
+            <h3 class="table-title">List Borrows</h3>
             <div class="table-actions">
                 <form method="GET" action="{{ route('admin.active-borrows.index') }}" class="search-box">
                     <i data-lucide="search"></i>
@@ -81,8 +81,8 @@
                         <tr><td colspan="9">
                             <div class="empty-state">
                                 <i data-lucide="inbox"></i>
-                                <p class="empty-title">No active borrows</p>
-                                <p class="empty-desc">Active borrows will appear here after handover.</p>
+                                <p class="empty-title">No list borrows</p>
+                                <p class="empty-desc">List borrows will appear here after handover.</p>
                             </div>
                         </td></tr>
                     @endforelse

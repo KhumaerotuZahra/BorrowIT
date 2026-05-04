@@ -25,6 +25,7 @@
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
                         <option value="overdue" {{ request('status') === 'overdue' ? 'selected' : '' }}>Overdue</option>
                         <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
+                        <option value="cancelled" {{ request('status') === 'calcelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                 </form>
                 <button class="btn btn-primary" onclick="openModal('new-borrow-modal')">
