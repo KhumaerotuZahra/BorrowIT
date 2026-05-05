@@ -42,10 +42,10 @@ class BorrowRequestController extends Controller
         $approvedCount = Borrowing::where('status', 'approved')->whereNull('parent_borrowing_id')->count();
 
         $assetGroups = AssetGroup::orderBy('group_name')->get();
-        $users = User::where('role', 'user')
-            ->where('status', 'active')
+        $users = User::where('status', 'active')
             ->orderBy('name')
             ->get();
+
         $admins = User::where('role', 'admin')
             ->where('status', 'active')
             ->orderBy('name')

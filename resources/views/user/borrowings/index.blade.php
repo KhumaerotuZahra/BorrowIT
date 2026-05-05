@@ -142,7 +142,7 @@
                     <input type="date" class="form-control" name="borrow_date" required value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Due Date (Return by)</label>
+                    <label class="form-label">Return Date</label>
                     <input type="date" class="form-control" name="due_date" required min="{{ date('Y-m-d', strtotime('+1 day')) }}">
                 </div>
             </div>

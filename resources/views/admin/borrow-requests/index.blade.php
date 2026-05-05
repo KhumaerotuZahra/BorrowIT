@@ -157,7 +157,7 @@
                     <input type="date" class="form-control" name="borrow_date" value="{{ date('Y-m-d') }}" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Due Date (Return By)</label>
+                    <label class="form-label">Return Date</label>
                     <input type="date" class="form-control" name="due_date" required>
                 </div>
             </div>
