@@ -46,6 +46,7 @@
                         <th>Status</th>
                         <th>Handover Notes</th>
                         <th>Return Notes</th>
+                        <th>Reject Notes</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -81,6 +82,15 @@
                                 @endphp
                                 {{ $returnNotes ?: '-' }}
                             </td>
+                            <td style="font-size:12px;">
+                                @if($borrow->status === 'rejected' && $borrow->notes)
+                                    <span style="color:var(--danger); font-weight:500;">
+                                        {{ $borrow->notes }}
+                                    </span>
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>
                                 @if($borrow->status === 'pending')
                                     <form method="POST" action="{{ route('user.borrowings.cancel', $borrow) }}" style="display:inline;">
@@ -95,7 +105,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9">
+                        <tr><td colspan="10">
                             <div class="empty-state">
                                 <i data-lucide="book-open"></i>
                                 <p class="empty-title">No borrowings yet</p>

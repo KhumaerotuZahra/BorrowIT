@@ -119,7 +119,10 @@ class DashboardController extends Controller
         $year = $request->get('year', date('Y'));
         $month = $request->get('month', '');
 
-        $query = Borrowing::with(['user', 'asset', 'assetGroup'])->whereYear('borrow_date', $year);
+        $query = Borrowing::with(['user', 'asset', 'assetGroup'])
+            ->whereYear('borrow_date', $year)
+            ->whereNotNull('parent_borrowing_id')
+            ->whereNotIn('status',['rejected','cancelled']);
         if ($month) {
             $query->whereMonth('borrow_date', $month);
         }
@@ -142,7 +145,7 @@ class DashboardController extends Controller
                     $i + 1,
                     $b->user->name ?? '-',
                     $b->user->department ?? '-',
-                    $b->asset->asset_name ?? ($b->assetGroup->group_name ?? '-'),
+                    $b->asset->asset_name ?? '-',
                     $b->borrow_date ? $b->borrow_date->format('Y-m-d') : '-',
                     $b->return_date ? $b->return_date->format('Y-m-d') : '-',
                     ucfirst($b->status),
@@ -161,11 +164,14 @@ class DashboardController extends Controller
 
         $query = Borrowing::select('asset_id')
             ->selectRaw('COUNT(*) as borrow_count')
+            ->whereNotNull('asset_id')
+            ->whereNotNull('parent_borrowing_id')
+            ->whereNotIn('status',['rejected','cancelled'])
             ->whereYear('borrow_date', $year);
         if ($month) {
             $query->whereMonth('borrow_date', $month);
         }
-        $items = $query->groupBy('asset_id')->orderByDesc('borrow_count')->with(['asset', 'assetGroup'])->get();
+        $items = $query->groupBy('asset_id')->orderByDesc('borrow_count')->with('asset')->get();
 
         $filename = "most_borrowed_{$year}" . ($month ? "_{$month}" : "") . ".csv";
 
@@ -199,7 +205,9 @@ class DashboardController extends Controller
 
         $query = Borrowing::with(['user', 'asset', 'assetGroup'])
             ->where('status', 'returned')
+            ->where('parent_borrowing_id')
             ->whereYear('return_date', $year);
+
         if ($month) {
             $query->whereMonth('return_date', $month);
         }
