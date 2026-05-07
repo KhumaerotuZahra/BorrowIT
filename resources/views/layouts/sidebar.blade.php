@@ -33,12 +33,7 @@
                 <i data-lucide="package"></i>
                 <span>Asset</span>
             </a>
-            <a href="{{ route('admin.asset-logs.index') }}" 
-                class="nav-item {{ str_starts_with($currentRoute, 'admin.asset-logs') ? 'active' : '' }}">
-                <i data-lucide="history"></i>
-                <span>Asset Logs</span>
-            </a>
-
+        
             <div class="nav-section-title">Borrowing</div>
             <a href="{{ route('admin.borrow-requests.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.borrow-requests') ? 'active' : '' }}">
                 <i data-lucide="file-text"></i>
@@ -53,6 +48,11 @@
             <a href="{{ route('admin.notifications.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.notifications') ? 'active' : '' }}">
                 <i data-lucide="bell"></i>
                 <span>Notification</span>
+            </a>
+             <a href="{{ route('admin.asset-logs.index') }}" 
+                class="nav-item {{ str_starts_with($currentRoute, 'admin.asset-logs') ? 'active' : '' }}">
+                <i data-lucide="history"></i>
+                <span>Asset Logs</span>
             </a>
             <a href="{{ route('admin.notification-settings.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.notification-settings') ? 'active' : '' }}">
                 <i data-lucide="settings"></i>

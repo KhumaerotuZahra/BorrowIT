@@ -138,7 +138,7 @@ class DashboardController extends Controller
         $callback = function () use ($borrowings) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['No', 'User', 'Department', 'Asset', 'Borrow Date', 'Return Date', 'Status']);
+            fputcsv($file, ['No', 'User', 'Department', 'Asset', 'Borrow Date', 'Return Date', 'Handover PIC', 'Status', 'Return PIC']);
 
             foreach ($borrowings as $i => $b) {
                 fputcsv($file, [
@@ -148,7 +148,9 @@ class DashboardController extends Controller
                     $b->asset->asset_name ?? '-',
                     $b->borrow_date ? $b->borrow_date->format('Y-m-d') : '-',
                     $b->return_date ? $b->return_date->format('Y-m-d') : '-',
+                    $b->handover_by ?? '-',
                     ucfirst($b->status),
+                    $b->return_pic ?? '-',
                 ]);
             }
             fclose($file);
@@ -223,13 +225,14 @@ class DashboardController extends Controller
         $callback = function () use ($items) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['No', 'Name', 'Asset Name', 'Return Date', 'Return PIC']);
+            fputcsv($file, ['No', 'Asset Name', 'Name', 'Borrow Date', 'Return Date', 'Return PIC']);
 
             foreach ($items as $i => $item) {
                 fputcsv($file, [
                     $i + 1,
+                    $item->asset->asset_name ?? '-',
                     $item->user->name ?? '-',
-                    $item->asset->asset_name ?? ($item->assetGroup->group_name ?? '-'),
+                    $item->borrow_date ? $b->borrow_date->format('Y-m-d') : '-',
                     $item->return_date ? $item->return_date->format('Y-m-d') : '-',
                     $item->return_pic ?? '-',
                 ]);
