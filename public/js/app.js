@@ -102,15 +102,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 list.innerHTML = notifications.map(n => {
                     const isUnread = !n.read_at;
                     const timeAgo = getTimeAgo(new Date(n.created_at));
+                    const href = n.open_url || '#';
                     return `
-                        <div class="notif-item ${isUnread ? 'unread' : ''}">
+                        <a class="notif-item ${isUnread ? 'unread' : ''}" href="${href}" style="text-decoration:none;color:inherit;display:flex;">
                             <div class="notif-icon"><i data-lucide="bell"></i></div>
                             <div class="notif-body">
                                 <div class="notif-title">${escapeHtml(n.title)}</div>
                                 <div class="notif-msg">${escapeHtml(n.message)}</div>
                                 <div class="notif-time">${timeAgo}</div>
                             </div>
-                        </div>
+                        </a>
                     `;
                 }).join('');
 

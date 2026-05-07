@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\BorrowingController;
 use App\Http\Controllers\Admin\AssetLogController;
+use App\Http\Controllers\Admin\NotificationSettingController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -39,6 +40,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
     Route::get('/notifications/latest', [NotificationController::class, 'getLatest'])->name('notifications.latest');
+    Route::get('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
 
     // Admin Routes
     Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->prefix('admin')->name('admin.')->group(function () {
@@ -99,6 +101,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+        // Notification Settings
+        Route::get('/notification-settings', [NotificationSettingController::class, 'index'])->name('notification-settings.index');
+        Route::put('/notification-settings', [NotificationSettingController::class, 'update'])->name('notification-settings.update');
     });
 
     // User Routes

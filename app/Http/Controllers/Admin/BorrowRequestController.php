@@ -84,13 +84,21 @@ class BorrowRequestController extends Controller
         ]);
 
         $user = User::find($request->user_id);
+        $userMsg = "A borrow request for {$group->group_name} (qty: {$request->quantity}) has been created on your behalf by admin.";
         Notification::send(
             $request->user_id,
             'borrow_request',
             'Borrow Request Created',
-            "A borrow request for {$group->group_name} (qty: {$request->quantity}) has been created on your behalf by admin.",
+            $userMsg,
             ['borrowing_id' => $borrowing->id]
         );
+
+        EmailHelper::sendBorrowEmail($request->user_id, 'borrow_request', 'Borrow Request Created', $userMsg, [
+            'Asset Group' => $group->group_name,
+            'Quantity' => $request->quantity,
+            'Borrow Date' => $request->borrow_date,
+            'Due Date' => $request->due_date,
+        ]);
 
         return back()->with('success', 'Borrow request created successfully!');
     }
@@ -113,12 +121,20 @@ class BorrowRequestController extends Controller
             ['borrowing_id' => $borrowing->id]
         );
 
-        EmailHelper::sendBorrowEmail($borrowing->user_id, 'approved', 'Borrow Request Approved', $msg, [
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'borrow_approved', 'Borrow Request Approved', $msg, [
             'Asset Group' => $groupName,
             'Quantity' => $borrowing->quantity,
             'Borrow Date' => $borrowing->borrow_date->format('d M Y'),
             'Due Date' => $borrowing->due_date->format('d M Y'),
         ]);
+
+        $borrowerName = $borrowing->user->name ?? 'User';
+        $adminMsg = "{$borrowerName}'s request to borrow {$groupName} (qty: {$borrowing->quantity}) has been approved.";
+        $this->notifyAdmins('borrow_approved', 'Borrow Request Approved', $adminMsg, [
+            'Borrower' => $borrowerName,
+            'Asset Group' => $groupName,
+            'Quantity' => $borrowing->quantity,
+        ], ['borrowing_id' => $borrowing->id]);
 
         return back()->with('success', 'Request approved successfully!');
     }
@@ -142,11 +158,19 @@ class BorrowRequestController extends Controller
             ['borrowing_id' => $borrowing->id]
         );
 
-        EmailHelper::sendBorrowEmail($borrowing->user_id, 'rejected', 'Borrow Request Rejected', $msg, [
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'borrow_rejected', 'Borrow Request Rejected', $msg, [
             'Asset Group' => $groupName,
             'Quantity' => $borrowing->quantity,
             'Reason' => $rejectNotes ?: '-',
         ]);
+
+        $borrowerName = $borrowing->user->name ?? 'User';
+        $adminMsg = "{$borrowerName}'s request to borrow {$groupName} has been rejected." . ($rejectNotes ? " Reason: {$rejectNotes}" : '');
+        $this->notifyAdmins('borrow_rejected', 'Borrow Request Rejected', $adminMsg, [
+            'Borrower' => $borrowerName,
+            'Asset Group' => $groupName,
+            'Reason' => $rejectNotes ?: '-',
+        ], ['borrowing_id' => $borrowing->id]);
 
         return back()->with('success', 'Request rejected.');
     }
@@ -165,10 +189,18 @@ class BorrowRequestController extends Controller
             ['borrowing_id' => $borrowing->id]
         );
 
-        EmailHelper::sendBorrowEmail($borrowing->user_id, 'rejected', 'Borrow Request Cancelled', $msg, [
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'borrow_cancelled', 'Borrow Request Cancelled', $msg, [
             'Asset Group' => $groupName,
             'Quantity' => $borrowing->quantity,
         ]);
+
+        $borrowerName = $borrowing->user->name ?? 'User';
+        $adminMsg = "{$borrowerName}'s approved request to borrow {$groupName} has been cancelled.";
+        $this->notifyAdmins('borrow_cancelled', 'Borrow Request Cancelled', $adminMsg, [
+            'Borrower' => $borrowerName,
+            'Asset Group' => $groupName,
+            'Quantity' => $borrowing->quantity,
+        ], ['borrowing_id' => $borrowing->id]);
 
         return back()->with('success', 'Request cancelled.');
     }
@@ -250,7 +282,7 @@ class BorrowRequestController extends Controller
             ['borrowing_id' => $borrowing->id]
         );
 
-        EmailHelper::sendBorrowEmail($borrowing->user_id, 'handover', 'Asset Handed Over', $msg, [
+        EmailHelper::sendBorrowEmail($borrowing->user_id, 'borrow_handover', 'Asset Handed Over', $msg, [
             'Asset Group' => $groupName,
             'Quantity' => $quantity,
             'Borrow Date' => $borrowDate,
@@ -258,6 +290,28 @@ class BorrowRequestController extends Controller
             'Handover By' => $request->handover_by,
         ]);
 
+        $borrowerName = $borrowing->user->name ?? 'User';
+        $adminMsg = "Asset(s) {$groupName} (qty: {$quantity}) have been handed over to {$borrowerName}. Due: {$borrowing->due_date->format('d M Y')}.";
+        $this->notifyAdmins('borrow_handover', 'Asset Handed Over', $adminMsg, [
+            'Borrower' => $borrowerName,
+            'Asset Group' => $groupName,
+            'Quantity' => $quantity,
+            'Due Date' => $borrowing->due_date->format('d M Y'),
+            'Handover By' => $request->handover_by,
+        ], ['borrowing_id' => $borrowing->id]);
+
         return back()->with('success', 'Asset(s) handed over successfully!');
+    }
+
+    /**
+     * Send web notification + email to all admins.
+     */
+    protected function notifyAdmins(string $type, string $title, string $body, array $details = [], array $data = []): void
+    {
+        $admins = User::where('role', 'admin')->where('status', 'active')->get();
+        foreach ($admins as $admin) {
+            Notification::send($admin->id, $type, $title, $body, $data);
+            EmailHelper::sendBorrowEmail($admin->id, $type, $title, $body, $details);
+        }
     }
 }

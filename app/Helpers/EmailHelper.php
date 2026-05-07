@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Mail\BorrowNotification;
+use App\Models\NotificationSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +25,23 @@ class EmailHelper
             $user = User::find($userId);
             if (!$user || !$user->email) {
                 Log::warning("Email skipped: user {$userId} not found or no email.");
+                return;
+            }
+
+            // Normalize short type aliases to canonical notification types
+            $canonical = match ($type) {
+                'approved'    => 'borrow_approved',
+                'rejected'    => 'borrow_rejected',
+                'cancelled'   => 'borrow_cancelled',
+                'handover'    => 'borrow_handover',
+                'returned'    => 'borrow_returned',
+                'overdue'     => 'borrow_overdue',
+                default       => $type,
+            };
+
+            $role = $user->isAdmin() ? 'admin' : 'user';
+            if (!NotificationSetting::isEmailEnabled($canonical, $role)) {
+                Log::info("Email skipped (disabled by setting) for {$user->email} [{$canonical}/{$role}].");
                 return;
             }
 

@@ -19,7 +19,7 @@
 
     <div class="table-card">
         @forelse($notifications as $notif)
-            <div style="display:flex;align-items:flex-start;gap:16px;padding:18px 24px;border-bottom:1px solid var(--border-light);transition:background var(--transition);{{ $notif->isRead() ? '' : 'background:var(--accent-light);' }}">
+            <a href="{{ route('notifications.open', $notif) }}" style="text-decoration:none;color:inherit;display:flex;align-items:flex-start;gap:16px;padding:18px 24px;border-bottom:1px solid var(--border-light);transition:background var(--transition);{{ $notif->isRead() ? '' : 'background:var(--accent-light);' }}">
                 <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
                     @if($notif->type === 'new_request') background:var(--warning-light);color:var(--warning);
                     @elseif($notif->type === 'borrow_approved') background:var(--success-light);color:var(--success);
@@ -50,14 +50,9 @@
                     <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;">{{ $notif->message }}</p>
                 </div>
                 @unless($notif->isRead())
-                    <form method="POST" action="{{ route('admin.notifications.read', $notif) }}">
-                        @csrf
-                        <button type="submit" class="btn btn-ghost btn-sm btn-icon" title="Mark as read">
-                            <i data-lucide="check"></i>
-                        </button>
-                    </form>
+                    <span style="font-size:11px;color:var(--accent);font-weight:600;align-self:center;">New</span>
                 @endunless
-            </div>
+            </a>
         @empty
             <div class="empty-state">
                 <i data-lucide="bell-off"></i>

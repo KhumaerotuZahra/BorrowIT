@@ -99,12 +99,26 @@ class ActiveBorrowController extends Controller
         ['borrowing_id' => $borrowing->id]
     );
 
-    EmailHelper::sendBorrowEmail($borrowing->user_id, 'returned', 'Asset Returned', $msg, [
+    EmailHelper::sendBorrowEmail($borrowing->user_id, 'borrow_returned', 'Asset Returned', $msg, [
         'Asset' => $assetName,
         'Return Condition' => ucfirst($request->return_condition),
         'Return Date' => now()->format('d M Y'),
         'Return PIC' => $request->return_pic ?? '-',
     ]);
+
+    $borrowerName = $borrowing->user->name ?? 'User';
+    $adminMsg = "Asset {$assetName} borrowed by {$borrowerName} has been returned with condition: " . strtoupper($request->return_condition);
+    $admins = User::where('role', 'admin')->where('status', 'active')->get();
+    foreach ($admins as $admin) {
+        Notification::send($admin->id, 'borrow_returned', 'Asset Returned', $adminMsg, ['borrowing_id' => $borrowing->id]);
+        EmailHelper::sendBorrowEmail($admin->id, 'borrow_returned', 'Asset Returned', $adminMsg, [
+            'Borrower' => $borrowerName,
+            'Asset' => $assetName,
+            'Return Condition' => ucfirst($request->return_condition),
+            'Return Date' => now()->format('d M Y'),
+            'Return PIC' => $request->return_pic ?? '-',
+        ]);
+    }
 
     return redirect()->route('admin.active-borrows.index')
         ->with('success', 'Asset returned successfully!');

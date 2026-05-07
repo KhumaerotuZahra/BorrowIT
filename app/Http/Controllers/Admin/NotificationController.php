@@ -32,6 +32,20 @@ class NotificationController extends Controller
         return back()->with('success', 'Notification marked as read.');
     }
 
+    /**
+     * Mark a notification as read and redirect to its target page.
+     */
+    public function open(Notification $notification)
+    {
+        if ($notification->user_id !== auth()->id()) {
+            abort(403);
+        }
+        if (!$notification->isRead()) {
+            $notification->update(['read_at' => now()]);
+        }
+        return redirect($notification->link);
+    }
+
     public function markAllRead()
     {
         Notification::where('user_id', auth()->id())
@@ -52,10 +66,22 @@ class NotificationController extends Controller
 
     public function getLatest()
     {
-        $notifications = Notification::where('user_id', auth()->id())
+        $notifications = Notification::with('user')
+            ->where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->take(5)
-            ->get();
+            ->get()
+            ->map(function ($n) {
+                return [
+                    'id'         => $n->id,
+                    'type'       => $n->type,
+                    'title'      => $n->title,
+                    'message'    => $n->message,
+                    'read_at'    => $n->read_at,
+                    'created_at' => $n->created_at,
+                    'open_url'   => route('notifications.open', $n),
+                ];
+            });
 
         return response()->json($notifications);
     }

@@ -54,6 +54,10 @@
                 <i data-lucide="bell"></i>
                 <span>Notification</span>
             </a>
+            <a href="{{ route('admin.notification-settings.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.notification-settings') ? 'active' : '' }}">
+                <i data-lucide="settings"></i>
+                <span>Setting</span>
+            </a>
             
         @else
             <a href="{{ route('user.dashboard') }}" class="nav-item {{ str_starts_with($currentRoute, 'user.dashboard') ? 'active' : '' }}">
