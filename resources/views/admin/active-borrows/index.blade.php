@@ -110,6 +110,15 @@
                 <p style="font-size:13px;color:var(--accent);font-weight:600;" id="return-info"></p>
             </div>
             <div class="form-group">
+                <label class="form-label">Return Condition</label>
+                <select name="return_condition" class="form-control" required>
+                    <option value="">Select condition</option>
+                    <option value="good">Good</option>
+                    <option value="broken">Broken</option>
+                    <option value="lost">Lost</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label class="form-label">Return PIC</label>
                 <select class="form-control" name="return_pic" required>
                     <option value="">Select PIC...</option>

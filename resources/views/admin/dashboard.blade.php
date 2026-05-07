@@ -23,7 +23,7 @@
                 <div class="stat-label">Available Stock</div>
             </div>
         </a>
-        <a href="{{ route('admin.borrow-requests.index', ['status' => 'pending']) }}" style="text-decoration:none;color:inherit;">
+        <a href="{{ route('admin.borrow-requests.index')}}" style="text-decoration:none;color:inherit;">
             <div class="stat-card warning {{ $pendingRequests > 0 ? 'blink' : '' }}" style="cursor:pointer;">
                 <div class="stat-icon"><i data-lucide="clock"></i></div>
                 <div class="stat-value">{{ $pendingRequests }}</div>

@@ -48,52 +48,65 @@ class ActiveBorrowController extends Controller
     }
 
     public function markReturned(Request $request, Borrowing $borrowing)
-    {
-        $request->validate([
-            'return_pic' => 'required|string',
-            'return_notes' => 'nullable|string',
+{
+    $request->validate([
+        'return_pic' => 'required|string',
+        'return_notes' => 'nullable|string',
+        'return_condition' => 'required|in:good,broken,lost', // 🔥 tambah ini
+    ]);
+
+    $asset = $borrowing->asset;
+
+    $borrowing->update([
+        'status' => 'returned',
+        'return_date' => Carbon::now(),
+        'return_pic' => $request->return_pic,
+        'return_notes' => $request->return_notes,
+        'return_condition' => $request->return_condition, 
+    ]);
+
+    if ($asset) {
+         $asset->increment('available_stock', 1);
+        $asset->update([
+            'condition' => $request->return_condition
         ]);
-
-        $borrowing->update([
-            'status' => 'returned',
-            'return_date' => Carbon::now(),
-            'return_pic' => $request->return_pic,
-            'return_notes' => $request->return_notes,
-        ]);
-
-        if ($borrowing->asset) {
-            $borrowing->asset->increment('available_stock', 1);
-        }
-
-        // Check if all child borrowings for parent are returned
-        if ($borrowing->parent_borrowing_id) {
-            $parent = $borrowing->parentBorrowing;
-            $allReturned = $parent->childBorrowings()->where('status', '!=', 'returned')->count() === 0;
-            if ($allReturned) {
-                $parent->update([
-                    'status' => 'returned',
-                    'return_date' => Carbon::now(),
-                    'return_pic' => $request->return_pic,
-                ]);
-            }
-        }
-
-        $assetName = $borrowing->asset->asset_name ?? 'Asset';
-        $msg = "The asset {$assetName} has been marked as returned. Thank you!";
-        Notification::send(
-            $borrowing->user_id,
-            'borrow_returned',
-            'Asset Returned',
-            $msg,
-            ['borrowing_id' => $borrowing->id]
-        );
-
-        EmailHelper::sendBorrowEmail($borrowing->user_id, 'returned', 'Asset Returned', $msg, [
-            'Asset' => $assetName,
-            'Return Date' => now()->format('d M Y'),
-            'Return PIC' => $request->return_pic ?? '-',
-        ]);
-
-        return redirect()->route('admin.active-borrows.index')->with('success', 'Asset marked as returned successfully!');
     }
+
+    if ($borrowing->parent_borrowing_id) {
+        $parent = $borrowing->parentBorrowing;
+        $allReturned = $parent->childBorrowings()
+            ->where('status', '!=', 'returned')
+            ->count() === 0;
+
+        if ($allReturned) {
+            $parent->update([
+                'status' => 'returned',
+                'return_date' => Carbon::now(),
+                'return_pic' => $request->return_pic,
+            ]);
+        }
+    }
+
+    $assetName = $asset->asset_name ?? 'Asset';
+
+    $msg = "The asset {$assetName} has been returned with condition: " . strtoupper($request->return_condition);
+
+    Notification::send(
+        $borrowing->user_id,
+        'borrow_returned',
+        'Asset Returned',
+        $msg,
+        ['borrowing_id' => $borrowing->id]
+    );
+
+    EmailHelper::sendBorrowEmail($borrowing->user_id, 'returned', 'Asset Returned', $msg, [
+        'Asset' => $assetName,
+        'Return Condition' => ucfirst($request->return_condition),
+        'Return Date' => now()->format('d M Y'),
+        'Return PIC' => $request->return_pic ?? '-',
+    ]);
+
+    return redirect()->route('admin.active-borrows.index')
+        ->with('success', 'Asset returned successfully!');
+}
 }

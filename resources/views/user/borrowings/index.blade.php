@@ -30,7 +30,7 @@
                 </form>
                 <button class="btn btn-primary" onclick="openModal('new-borrow-modal')">
                     <i data-lucide="plus"></i>
-                    New Borrow
+                    New Request
                 </button>
             </div>
         </div>

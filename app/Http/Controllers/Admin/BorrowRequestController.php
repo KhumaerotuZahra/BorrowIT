@@ -178,6 +178,7 @@ class BorrowRequestController extends Controller
     {
         $assets = Asset::where('asset_group_id', $assetGroup->id)
             ->where('available_stock', '>', 0)
+            ->where('condition', 'good')
             ->orderBy('asset_name')
             ->get(['id', 'asset_name', 'asset_number', 'available_stock']);
 

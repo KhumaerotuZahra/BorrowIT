@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ActiveBorrowController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\BorrowingController;
+use App\Http\Controllers\Admin\AssetLogController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -78,6 +79,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/assets/export-template', [AssetController::class, 'exportTemplate'])->name('assets.export-template');
         Route::delete('/assets/{asset}', [AssetController::class, 'destroy'])->name('assets.destroy');
 
+        // Asset Logs
+        Route::get('/asset-logs', [AssetLogController::class, 'index'])->name('asset-logs.index');
+        
         // Borrow Requests
         Route::get('/borrow-requests', [BorrowRequestController::class, 'index'])->name('borrow-requests.index');
         Route::post('/borrow-requests', [BorrowRequestController::class, 'adminStore'])->name('borrow-requests.store');

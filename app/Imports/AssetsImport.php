@@ -19,7 +19,12 @@ class AssetsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
         $assetNumber = $row['asset_number'] ?? $row['no_asset'] ?? $row['nomor_asset'] ?? $row['number'] ?? null;
         $assetName = $row['asset_name'] ?? $row['nama_asset'] ?? $row['name'] ?? $row['nama'] ?? null;
         $stock = $row['available_stock'] ?? $row['stock'] ?? $row['qty'] ?? $row['quantity'] ?? $row['jumlah'] ?? 1;
+        $conditionRaw = $row['condition'] ?? 'good';
+        $condition= strtolower(trim($conditionRaw));
 
+        if (!in_array($condition, ['good', 'broken', 'lost'])) {
+            $condition = 'good';
+        }
         if (!$assetName) {
             $this->skipped++;
             return null;
@@ -46,6 +51,7 @@ class AssetsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
             'asset_name'      => $assetName,
             'total_stock'     => (int) $stock,
             'available_stock' => (int) $stock,
+            'condition'       => $condition,
         ]);
     }
 

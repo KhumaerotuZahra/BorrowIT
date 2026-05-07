@@ -33,6 +33,11 @@
                 <i data-lucide="package"></i>
                 <span>Asset</span>
             </a>
+            <a href="{{ route('admin.asset-logs.index') }}" 
+                class="nav-item {{ str_starts_with($currentRoute, 'admin.asset-logs') ? 'active' : '' }}">
+                <i data-lucide="history"></i>
+                <span>Asset Logs</span>
+            </a>
 
             <div class="nav-section-title">Borrowing</div>
             <a href="{{ route('admin.borrow-requests.index') }}" class="nav-item {{ str_starts_with($currentRoute, 'admin.borrow-requests') ? 'active' : '' }}">
@@ -49,6 +54,7 @@
                 <i data-lucide="bell"></i>
                 <span>Notification</span>
             </a>
+            
         @else
             <a href="{{ route('user.dashboard') }}" class="nav-item {{ str_starts_with($currentRoute, 'user.dashboard') ? 'active' : '' }}">
                 <i data-lucide="layout-dashboard"></i>

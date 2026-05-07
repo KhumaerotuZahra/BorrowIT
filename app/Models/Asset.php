@@ -16,6 +16,7 @@ class Asset extends Model
         'asset_name',
         'total_stock',
         'available_stock',
+        'condition',
     ];
 
     public function assetGroup()

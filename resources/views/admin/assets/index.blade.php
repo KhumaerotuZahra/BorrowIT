@@ -12,9 +12,20 @@
         <div class="table-header">
             <h3 class="table-title">All Assets</h3>
             <div class="table-actions">
-                <form method="GET" action="{{ route('admin.assets.index') }}" class="search-box">
-                    <i data-lucide="search"></i>
-                    <input type="text" name="search" placeholder="Search assets..." value="{{ request('search') }}">
+                <form method="GET" action="{{ route('admin.assets.index') }}" class="table-actions" style="display:flex;gap:10px;">
+    
+                    <div class="search-box">
+                        <i data-lucide="search"></i>
+                        <input type="text" name="search" placeholder="Search assets..." value="{{ request('search') }}">
+                    </div>
+
+                    <select name="condition" class="form-control" onchange="this.form.submit()" style="width:auto;">
+                        <option value="">All Condition</option>
+                        <option value="good" {{ request('condition') === 'good' ? 'selected' : '' }}>Good</option>
+                        <option value="broken" {{ request('condition') === 'broken' ? 'selected' : '' }}>Broken</option>
+                        <option value="lost" {{ request('condition') === 'lost' ? 'selected' : '' }}>Lost</option>
+                    </select>
+
                 </form>
                 <a href="{{ route('admin.assets.export-template') }}" class="btn btn-outline">
                     <i data-lucide="download"></i>
@@ -40,6 +51,7 @@
                         <th>Asset Number</th>
                         <th>Asset Name</th>
                         <th>Available</th>
+                        <th>Condition</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -57,8 +69,23 @@
                                 </span>
                             </td>
                             <td>
+                                @if($asset->condition === 'good')
+                                    <span class="badge badge-good">
+                                         <i data-lucide="check-circle"></i> Good
+                                    </span>
+                                @elseif($asset->condition === 'broken')
+                                    <span class="badge badge-broken">
+                                        <i data-lucide="alert-triangle"></i> Broken
+                                    </span>
+                                @else
+                                    <span class="badge badge-lost">
+                                        <i data-lucide="x-circle"></i> Lost
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
                                 <div class="action-btns">
-                                    <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditAsset({{ $asset->id }}, '{{ $asset->asset_group_id }}', '{{ addslashes($asset->asset_number) }}', '{{ addslashes($asset->asset_name) }}', {{ $asset->available_stock }})" title="Edit">
+                                    <button class="btn btn-ghost btn-sm btn-icon" onclick="openEditAsset({{ $asset->id }}, '{{ $asset->asset_group_id }}', '{{ addslashes($asset->asset_number) }}', '{{ addslashes($asset->asset_name) }}', {{ $asset->available_stock }}, '{{ $asset->condition }}')" title="Edit">
                                         <i data-lucide="pencil"></i>
                                     </button>
                                     <form method="POST" action="{{ route('admin.assets.destroy', $asset) }}" onsubmit="return confirm('Delete this asset?')">
@@ -154,6 +181,14 @@
                 <label class="form-label">Available Stock</label>
                 <input type="number" class="form-control" name="available_stock" required min="0" placeholder="Enter stock quantity">
             </div>
+            <div class="form-group">
+                <label class="form-label">Condition</label>
+                <select name="condition" class="form-control" required>
+                    <option value="good">Good</option>
+                    <option value="broken">Broken</option>
+                    <option value="lost">Lost</option>
+                </select>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
@@ -192,6 +227,14 @@
                 <label class="form-label">Available Stock</label>
                 <input type="number" class="form-control" name="available_stock" id="edit-asset-stock" required min="0">
             </div>
+            <div class="form-group">
+                <label class="form-label">Condition</label>
+                <select name="condition" id="edit-asset-condition" class="form-control" required>
+                    <option value="good">Good</option>
+                    <option value="broken">Broken</option>
+                    <option value="lost">Lost</option>
+                </select>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" onclick="closeAllModals()">Cancel</button>
@@ -203,12 +246,13 @@
 
 @push('scripts')
 <script>
-function openEditAsset(id, groupId, number, name, stock) {
+function openEditAsset(id, groupId, number, name, stock, condition) {
     document.getElementById('edit-asset-form').action = '{{ url('admin/assets') }}/' + id;
     document.getElementById('edit-asset-group').value = groupId || '';
     document.getElementById('edit-asset-number').value = number;
     document.getElementById('edit-asset-name').value = name;
     document.getElementById('edit-asset-stock').value = stock;
+    document.getElementById('edit-asset-condition').value = condition;
     openModal('edit-asset-modal');
     lucide.createIcons();
 }

@@ -18,7 +18,7 @@
                 </form>
                 <button class="btn btn-primary" onclick="openModal('add-request-modal')">
                     <i data-lucide="plus"></i>
-                    Request
+                    New Request
                 </button>
             </div>
         </div>
