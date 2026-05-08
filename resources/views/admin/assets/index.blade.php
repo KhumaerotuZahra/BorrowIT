@@ -21,9 +21,9 @@
 
                     <select name="condition" class="form-control" onchange="this.form.submit()" style="width:auto;">
                         <option value="">All Condition</option>
-                        <option value="good" {{ request('condition') === 'good' ? 'selected' : '' }}>Good</option>
-                        <option value="broken" {{ request('condition') === 'broken' ? 'selected' : '' }}>Broken</option>
-                        <option value="lost" {{ request('condition') === 'lost' ? 'selected' : '' }}>Lost</option>
+                        <option value="good" {{ $condition === 'good' ? 'selected' : '' }}>Good</option>
+                        <option value="broken" {{ $condition  === 'broken' ? 'selected' : '' }}>Broken</option>
+                        <option value="lost" {{ $condition === 'lost' ? 'selected' : '' }}>Lost</option>
                     </select>
 
                 </form>

@@ -36,7 +36,7 @@
 
                         <!-- ASSET -->
                         <td>
-                            <span class="font-mono">
+                            <span style="font-weight:500;">
                                 {{ $log->asset_name ?? '-' }}
                             </span>
                         </td>

@@ -25,16 +25,22 @@ class AssetController extends Controller
                   ->orWhere('asset_name', 'like', "%{$search}%");
             });
         }
+        if ($request->has('condition')){
+            session(['asset_condition_filter' => $request->condition]);
+        }
+        $condition = $request->condition ?? session('asset_condition_filter');
 
         // Filter condition
-        if ($request->filled('condition')) {
-            $query->where('condition', $request->condition);
+        if (!empty($condition)) {
+            $query->where('condition', $condition);
         }
+
+        $assets = $query->get();
 
         $assets = $query->orderBy('created_at', 'asc')->paginate(10);
         $assetGroups = AssetGroup::orderBy('group_name')->get();
 
-        return view('admin.assets.index', compact('assets', 'assetGroups'));
+        return view('admin.assets.index', compact('assets', 'assetGroups', 'condition'));
     }
 
     public function store(Request $request)
