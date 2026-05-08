@@ -37,7 +37,6 @@
                             <tr>
                                 <td>
                                     <div style="font-weight:600;">{{ $setting->label }}</div>
-                                    <div style="font-size:12px;color:var(--text-muted);">{{ $setting->type }}</div>
                                 </td>
                                 <td style="text-align:center;">
                                     <input type="checkbox"

@@ -106,7 +106,7 @@
                 <a href="{{ route('user.notifications.index') }}" class="btn btn-outline btn-sm">View All</a>
             </div>
             @forelse($notifications as $notif)
-                <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 24px;border-bottom:1px solid var(--border-light);{{ $notif->isRead() ? '' : 'background:var(--accent-light);' }}">
+                <a href="{{ route('notifications.open', $notif) }}" style="text-decoration:none;color:inherit;display:flex;align-items:flex-start;gap:12px;padding:14px 24px;border-bottom:1px solid var(--border-light);{{ $notif->isRead() ? '' : 'background:var(--accent-light);' }}">
                     <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
                         @if($notif->type === 'borrow_approved') background:var(--success-light);color:var(--success);
                         @elseif($notif->type === 'borrow_rejected') background:var(--danger-light);color:var(--danger);
@@ -136,14 +136,9 @@
                         <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">{{ $notif->created_at->diffForHumans() }}</div>
                     </div>
                     @if(!$notif->isRead())
-                        <form method="POST" action="{{ route('user.notifications.read', $notif) }}">
-                            @csrf
-                            <button type="submit" class="btn btn-ghost btn-sm btn-icon" title="Mark as read">
-                                <i data-lucide="check" style="width:14px;height:14px;"></i>
-                            </button>
-                        </form>
+                        <span style="font-size:11px;color:var(--accent);font-weight:600;align-self:center;">New</span>
                     @endif
-                </div>
+                </a>
             @empty
                 <div class="empty-state">
                     <i data-lucide="bell-off"></i>
