@@ -153,7 +153,7 @@
             <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <input type="email" class="form-control" name="email" required placeholder="name@ptbpi.co.id">
-                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;">Must use @ptbpi.co.id domain</small>
+                <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;">Must use @ptbpi.co.id or @gmail.com domain</small>
             </div>
             <div class="form-group">
                 <label class="form-label">Password</label>

@@ -17,7 +17,7 @@
                 <span class="logo-text"><span class="logo-borrow">Borrow</span><span class="logo-it">IT</span></span>
             </div>
             <h1 class="login-title">Forgot Password</h1>
-            <p class="login-subtitle">Enter your @ptbpi.co.id email to receive a password reset link</p>
+            <p class="login-subtitle">Enter your @ptbpi.co.id or @gmail.com email to receive a password reset link</p>
 
             @if(session('success'))
                 <div class="alert alert-success" style="margin-bottom: 20px;">
@@ -45,7 +45,7 @@
                 <div class="form-group">
                     <label class="form-label" for="email">Email Address</label>
                     <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="yourname@ptbpi.co.id" required autofocus>
-                    <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;">Only @ptbpi.co.id email addresses are accepted</small>
+                    <small style="font-size:11px;color:var(--text-muted);margin-top:4px;display:block;">Only @ptbpi.co.id or @gmail.com email addresses are accepted</small>
                 </div>
                 <button type="submit" class="btn btn-primary login-btn">
                     <i data-lucide="mail"></i>

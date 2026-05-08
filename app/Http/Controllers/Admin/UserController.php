@@ -43,12 +43,12 @@ class UserController extends Controller
         $request->validate([
             'employee_id' => 'required|unique:users,employee_id',
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'unique:users,email', 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
+            'email' => ['required', 'email', 'unique:users,email', 'regex:/^[a-zA-Z0-9._%+-]+@(ptbpi\.co\.id|gmail\.com)$/'],
             'password' => 'required|string|min:8',
             'department' => 'required|string',
             'role' => 'required|in:admin,user',
         ], [
-            'email.regex' => 'Email must use the @ptbpi.co.id domain.',
+            'email.regex' => 'Email must use the @ptbpi.co.id or @gmail.com domain.',
         ]);
 
         User::create([
@@ -71,12 +71,12 @@ class UserController extends Controller
                 Rule::unique('users', 'employee_id')->ignore($user->id),
             ],
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'unique:users,email,' . $user->id, 'regex:/^[a-zA-Z0-9._%+-]+@ptbpi\.co\.id$/'],
+            'email' => ['required', 'email', 'unique:users,email,' . $user->id, 'regex:/^[a-zA-Z0-9._%+-]+@(ptbpi\.co\.id|gmail\.com)$/'],
             'department' => 'required|string',
             'role' => 'required|in:admin,user',
             'status' => 'required|in:active,inactive',
         ], [
-            'email.regex' => 'Email must use the @ptbpi.co.id domain.',
+            'email.regex' => 'Email must use the @ptbpi.co.id or @gmail.com domain.',
         ]);
 
         $data = $request->only(['employee_id', 'name', 'email', 'department', 'role', 'status']);
