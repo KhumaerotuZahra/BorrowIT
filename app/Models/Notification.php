@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
-use App\Models\NotificationSetting;
 
 class Notification extends Model
 {
@@ -58,6 +55,7 @@ class Notification extends Model
 
     public static function send($userId, $type, $title, $message, $data = null)
     {
+        // Only create web notification — email is handled by EmailHelper
         $notification = self::create([
             'user_id' => $userId,
             'type' => $type,
@@ -65,31 +63,6 @@ class Notification extends Model
             'message' => $message,
             'data' => $data,
         ]);
-
-        // Only send email if SMTP is configured (not in log mode)
-        if (config('mail.default') === 'smtp') {
-            try {
-                $user = User::find($userId);
-                if ($user && $user->email) {
-                    $role = $user->isAdmin() ? 'admin' : 'user';
-                    if (NotificationSetting::isEmailEnabled($type, $role)) {
-                        Mail::send('emails.notification', [
-                            'notifData' => [
-                                'name' => $user->name,
-                                'message' => $message,
-                                'action_url' => url($user->isAdmin() ? '/admin/dashboard' : '/user/dashboard'),
-                                'action_text' => 'Open BorrowIT',
-                            ],
-                        ], function ($mail) use ($user, $title) {
-                            $mail->to($user->email);
-                            $mail->subject('BorrowIT - ' . $title);
-                        });
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::warning('Failed to send notification email: ' . $e->getMessage());
-            }
-        }
 
         return $notification;
     }
