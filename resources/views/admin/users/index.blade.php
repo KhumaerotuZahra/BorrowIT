@@ -157,7 +157,13 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Password</label>
-                <input type="password" class="form-control" name="password" required placeholder="Minimum 8 characters" minlength="8">
+                <div style="position:relative;">
+                    <input type="password" class="form-control" name="password" id="password" required placeholder="Minimum 8 characters" minlength="8" style="padding-right:45px;">
+
+                    <button type="button" onclick="togglePassword('password', 'eye1')" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted);">
+                        <i data-lucide="eye" id="eye1"></i>
+                    </button>
+                </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -220,11 +226,23 @@
             <div id="reset-pw-fields" style="display:none;">
                 <div class="form-group">
                     <label class="form-label">New Password</label>
-                    <input type="password" class="form-control" name="password" id="edit-password" placeholder="Enter new password" minlength="8">
+                    <div style="position:relative;">
+                        <input type="password" class="form-control" name="password" id="edit-password" placeholder="Enter new password" minlength="8" style="padding-right:45px;">
+
+                        <button type="button" onclick="togglePassword('edit-password', 'eye1')" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted);">
+                            <i data-lucide="eye" id="eye1"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" name="password_confirmation" id="edit-password-confirm" placeholder="Confirm new password">
+                    <div style="position:relative;">
+                        <input type="password" class="form-control" name="password_confirmation" id="edit-password-confirm" placeholder="Confirm new password" style="padding-right:45px;">
+
+                        <button type="button" onclick="togglePassword('edit-password-confirm', 'eye2')" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted);">
+                            <i data-lucide="eye" id="eye2"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="form-row">
@@ -304,5 +322,20 @@ function toggleResetPw(show) {
         pwConfirm.value = '';
     }
 }
+
+ function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            input.type = 'password';
+            icon.setAttribute('data-lucide', 'eye');
+        }
+
+        lucide.createIcons();
+    }
 </script>
 @endpush

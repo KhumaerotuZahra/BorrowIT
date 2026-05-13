@@ -37,7 +37,7 @@ class ActiveBorrowController extends Controller
         $borrowings = $query
             ->orderByRaw("FIELD(status, 'overdue', 'active', 'returned')")
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(20);
 
         $admins = User::where('role', 'admin')
             ->where('status', 'active')

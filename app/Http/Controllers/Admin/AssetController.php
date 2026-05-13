@@ -37,7 +37,7 @@ class AssetController extends Controller
 
         $assets = $query->get();
 
-        $assets = $query->orderBy('created_at', 'asc')->paginate(10);
+        $assets = $query->orderBy('created_at', 'asc')->paginate(20);
         $assetGroups = AssetGroup::orderBy('group_name')->get();
 
         return view('admin.assets.index', compact('assets', 'assetGroups', 'condition'));

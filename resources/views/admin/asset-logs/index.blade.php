@@ -9,6 +9,33 @@
 </div>
 
 <div class="table-card">
+
+    <div class="table-header">
+        <h3 class="table-title">Asset Activity Logs</h3>
+
+        <div class="table-actions">
+            <form method="GET"
+                    action="{{route('admin.asset-logs.index')}}"
+                    style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+
+                    <div class="search-box">
+                        <i data-lucide="search"></i>
+                        <input type="text"
+                                name="search"
+                                placeholder="Search user or asset..."
+                                value="{{request('search')}}">
+                    </div>
+                    <select name="action" class="form-control" onchange="this.form.submit()" style="width:auto;">
+                        <option value="">All Action</option>
+                        <option value="create" {{ request('action') == 'create' ? 'selected' : '' }}>Create</option>
+                        <option value="update" {{ request('action') == 'update' ? 'selected' : '' }}>Update</option>
+                        <option value="delete" {{ request('action') == 'delete' ? 'selected' : '' }}>Delete</option>
+                        <option value="import" {{ request('action') == 'import' ? 'selected' : '' }}>Import</option>
+                    </select>
+            </form>
+        </div>
+    </div>
+                
     <div class="table-responsive">
         <table class="data-table">
             <thead>
@@ -102,7 +129,7 @@
     <!-- PAGINATION -->
     @if($logs->hasPages())
         <div class="pagination-wrapper">
-            {{ $logs->links() }}
+            {{ $logs->withQueryString()->links() }}
         </div>
     @endif
 </div>

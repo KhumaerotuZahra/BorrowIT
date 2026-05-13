@@ -32,7 +32,7 @@ class BorrowingController extends Controller
             $query->where('status', $request->status);
         }
 
-        $borrowings = $query->orderBy('created_at', 'desc')->paginate(10);
+        $borrowings = $query->orderBy('created_at', 'desc')->paginate(20);
         $assetGroups = AssetGroup::orderBy('group_name')->get();
 
         return view('user.borrowings.index', compact('borrowings', 'assetGroups'));

@@ -20,7 +20,7 @@ class AssetGroupController extends Controller
             });
         }
 
-        $groups = $query->orderBy('created_at', 'asc')->paginate(10);
+        $groups = $query->orderBy('created_at', 'asc')->paginate(20);
 
         return view('admin.asset-groups.index', compact('groups'));
     }

@@ -32,7 +32,7 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        $users = $query->orderBy('employee_id', 'asc')->paginate(10);
+        $users = $query->orderBy('employee_id', 'asc')->paginate(20);
         $departments = Department::orderBy('name')->get();
 
         return view('admin.users.index', compact('users', 'departments'));

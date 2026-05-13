@@ -36,7 +36,7 @@ class BorrowRequestController extends Controller
         $borrowings = $query->whereIn('status', ['pending', 'approved', 'rejected'])
             ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(20);
 
         $pendingCount = Borrowing::where('status', 'pending')->whereNull('parent_borrowing_id')->count();
         $approvedCount = Borrowing::where('status', 'approved')->whereNull('parent_borrowing_id')->count();
