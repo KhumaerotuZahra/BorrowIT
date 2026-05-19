@@ -76,14 +76,18 @@ class DashboardController extends Controller
         $mostBorrowedQuery = Borrowing::select('asset_id')
             ->selectRaw('COUNT(*) as borrow_count')
             ->whereNotNull('asset_id')
+            ->whereNotNull('parent_borrowing_id')
+            ->whereNotIn('status', ['rejected', 'cancelled'])
             ->whereYear('borrow_date', $year);
+
         if ($month) {
             $mostBorrowedQuery->whereMonth('borrow_date', $month);
         }
+
         $mostBorrowed = $mostBorrowedQuery
             ->groupBy('asset_id')
             ->orderByDesc('borrow_count')
-            ->with(['asset', 'assetGroup'])
+            ->with('asset')
             ->take(10)
             ->get();
 
@@ -207,7 +211,7 @@ class DashboardController extends Controller
 
         $query = Borrowing::with(['user', 'asset', 'assetGroup'])
             ->where('status', 'returned')
-            ->where('parent_borrowing_id')
+            ->whereNotNull('parent_borrowing_id')
             ->whereYear('return_date', $year);
 
         if ($month) {
@@ -232,7 +236,7 @@ class DashboardController extends Controller
                     $i + 1,
                     $item->asset->asset_name ?? '-',
                     $item->user->name ?? '-',
-                    $item->borrow_date ? $b->borrow_date->format('Y-m-d') : '-',
+                    $item->borrow_date ? $item->borrow_date->format('Y-m-d') : '-',
                     $item->return_date ? $item->return_date->format('Y-m-d') : '-',
                     $item->return_pic ?? '-',
                 ]);
