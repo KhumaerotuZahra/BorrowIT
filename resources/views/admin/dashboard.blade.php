@@ -16,7 +16,7 @@
                 <div class="stat-label">Total Assets</div>
             </div>
         </a>
-        <a href="{{ route('admin.assets.index', ['status' => 'available']) }}" style="text-decoration:none;color:inherit;">
+        <a href="{{ route('admin.assets.index', ['condition' => 'good']) }}" style="text-decoration:none;color:inherit;">
             <div class="stat-card success" style="cursor:pointer;">
                 <div class="stat-icon"><i data-lucide="check-circle"></i></div>
                 <div class="stat-value">{{ $availableStock }}</div>

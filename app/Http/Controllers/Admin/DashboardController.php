@@ -17,7 +17,7 @@ class DashboardController extends Controller
         Borrowing::checkAndUpdateOverdue();
 
         $totalAssets = Asset::count();
-        $availableStock = Asset::sum('available_stock');
+        $availableStock = Asset::where('condition', 'good')->sum('available_stock');
         $pendingRequests = Borrowing::where('status', 'pending')->whereNull('parent_borrowing_id')->count();
         $activeBorrows = Borrowing::where('status', 'active')->whereNotNull('parent_borrowing_id')->count();
         $overdueCount = Borrowing::where('status', 'overdue')->whereNotNull('parent_borrowing_id')->count();
