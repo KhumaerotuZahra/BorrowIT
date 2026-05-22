@@ -11,6 +11,7 @@ use App\Models\Notification;
 use App\Helpers\EmailHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BorrowRequestController extends Controller
 {
@@ -218,30 +219,42 @@ class BorrowRequestController extends Controller
     }
 
     public function handover(Request $request, Borrowing $borrowing)
-    {
-        $request->validate([
-            'borrow_date' => 'nullable|date',
-            'handover_by' => 'required|string',
-            'handover_notes' => 'nullable|string',
-            'asset_ids' => 'required|array|min:1',
-            'asset_ids.*' => 'required|exists:assets,id',
-        ]);
+{
+    $request->validate([
+        'borrow_date' => 'nullable|date',
+        'handover_by' => 'required|string',
+        'handover_notes' => 'nullable|string',
+        'asset_ids' => 'required|array|min:1',
+        'asset_ids.*' => 'required|exists:assets,id',
+    ]);
 
-        $quantity = $borrowing->quantity;
-        $assetIds = $request->asset_ids;
+    $quantity = $borrowing->quantity;
+    $assetIds = $request->asset_ids;
 
-        if (count($assetIds) != $quantity) {
-            return back()->with('error', "Please select exactly {$quantity} asset(s).");
-        }
+    if (count($assetIds) != $quantity) {
+        return back()->with('error', "Please select exactly {$quantity} asset(s).");
+    }
 
-        $borrowDate = $request->filled('borrow_date') ? $request->borrow_date : $borrowing->borrow_date;
+    // Prevent duplicate asset selection
+    if (count($assetIds) !== count(array_unique($assetIds))) {
+        return back()->with('error', 'Duplicate asset selected. Please select different assets.');
+    }
 
-        // Create individual borrowing records for each asset
+    $borrowDate = $request->filled('borrow_date')
+        ? $request->borrow_date
+        : $borrowing->borrow_date;
+
+    DB::beginTransaction();
+
+    try {
+
+        // Create individual borrowing records
         foreach ($assetIds as $assetId) {
+
             $asset = Asset::findOrFail($assetId);
 
             if ($asset->available_stock < 1) {
-                return back()->with('error', "Asset '{$asset->asset_name}' is no longer available!");
+                throw new \Exception("Asset '{$asset->asset_name}' is no longer available!");
             }
 
             Borrowing::create([
@@ -263,7 +276,7 @@ class BorrowRequestController extends Controller
             $asset->decrement('available_stock', 1);
         }
 
-        // Mark original request as active
+        // Update parent request
         $borrowing->update([
             'status' => 'active',
             'handover_by' => $request->handover_by,
@@ -272,36 +285,61 @@ class BorrowRequestController extends Controller
             'borrow_date' => $borrowDate,
         ]);
 
-        $groupName = $borrowing->assetGroup->group_name ?? 'Asset';
-        $msg = "The asset(s) {$groupName} (qty: {$quantity}) have been handed over to you. Due: {$borrowing->due_date->format('d M Y')}.";
-        Notification::send(
-            $borrowing->user_id,
-            'borrow_handover',
-            'Asset Handed Over',
-            $msg,
-            ['borrowing_id' => $borrowing->id]
-        );
+        DB::commit();
 
-        EmailHelper::sendBorrowEmail($borrowing->user_id, 'borrow_handover', 'Asset Handed Over', $msg, [
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return back()->with('error', $e->getMessage());
+    }
+
+    $groupName = $borrowing->assetGroup->group_name ?? 'Asset';
+
+    $msg = "The asset(s) {$groupName} (qty: {$quantity}) have been handed over to you. Due: {$borrowing->due_date->format('d M Y')}.";
+
+    Notification::send(
+        $borrowing->user_id,
+        'borrow_handover',
+        'Asset Handed Over',
+        $msg,
+        ['borrowing_id' => $borrowing->id]
+    );
+
+    EmailHelper::sendBorrowEmail(
+        $borrowing->user_id,
+        'borrow_handover',
+        'Asset Handed Over',
+        $msg,
+        [
             'Asset Group' => $groupName,
             'Quantity' => $quantity,
             'Borrow Date' => $borrowDate,
             'Due Date' => $borrowing->due_date->format('d M Y'),
             'Handover By' => $request->handover_by,
-        ]);
+        ]
+    );
 
-        $borrowerName = $borrowing->user->name ?? 'User';
-        $adminMsg = "Asset(s) {$groupName} (qty: {$quantity}) have been handed over to {$borrowerName}. Due: {$borrowing->due_date->format('d M Y')}.";
-        $this->notifyAdmins('borrow_handover', 'Asset Handed Over', $adminMsg, [
+    $borrowerName = $borrowing->user->name ?? 'User';
+
+    $adminMsg = "Asset(s) {$groupName} (qty: {$quantity}) have been handed over to {$borrowerName}. Due: {$borrowing->due_date->format('d M Y')}.";
+
+    $this->notifyAdmins(
+        'borrow_handover',
+        'Asset Handed Over',
+        $adminMsg,
+        [
             'Borrower' => $borrowerName,
             'Asset Group' => $groupName,
             'Quantity' => $quantity,
             'Due Date' => $borrowing->due_date->format('d M Y'),
             'Handover By' => $request->handover_by,
-        ], ['borrowing_id' => $borrowing->id]);
+        ],
+        ['borrowing_id' => $borrowing->id]
+    );
 
-        return back()->with('success', 'Asset(s) handed over successfully!');
-    }
+    return back()->with('success', 'Asset(s) handed over successfully!');
+}
 
     /**
      * Send web notification + email to all admins.

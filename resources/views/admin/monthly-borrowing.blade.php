@@ -179,7 +179,7 @@
                         <tr><td colspan="9">
                             <div class="empty-state">
                                 <i data-lucide="calendar"></i>
-                                <p class="empty-title">Belum ada data</p>
+                                <p class="empty-title">No Data Yet</p>
                             </div>
                         </td></tr>
                     @endforelse
